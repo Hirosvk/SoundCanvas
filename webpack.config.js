@@ -2,7 +2,7 @@ module.exports = {
   context: __dirname,
   entry: "./frontend/entry.js",
   output: {
-    path: "./",
+    path: "./frontend",
     filename: "bundle.js",
   },
   devtool: 'source-maps',
