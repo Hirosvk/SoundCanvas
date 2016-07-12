@@ -1,21 +1,17 @@
-const Circle = require('./lib/circle.js');
+const Field = require('./lib/field.js');
+const Note = require('./lib/note.js');
+const Keyboard = require('./lib/keyboard.js');
 
 document.addEventListener("DOMContentLoaded", function(){
   const canvasEl = document.getElementById('canvas');
-  const field = canvasEl.getContext('2d');
+  const ctx = canvasEl.getContext('2d');
+  const field = new Field(
+    [canvasEl.width, canvasEl.height]
+  ).animate(ctx);
 
-  const options = {
-    pos: [100, 100],
-    vel: [1,1],
-    rad: 10,
-    color: 'red'
-  }
+  const keyboarFrame = document.getElementById('keyboard-frame');
+  const keyboard = new Keyboard('major', 'C4');
+  keyboard.render(keyboarFrame);
 
-  const circle1 = new Circle (options)
-
-  setInterval(function(field){
-    circle1.move();
-    circle1.render()
-  }.bind(this, field), 1000)
 
 })
