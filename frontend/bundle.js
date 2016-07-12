@@ -132,7 +132,7 @@
 	const freq = __webpack_require__(4);
 	const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 	
-	const Note = function(noteName){
+	function Note (noteName){
 	  this.noteName = noteName;
 	  this.osc = audioContext.createOscillator();
 	  this.osc.frequency.value = freq[noteName];
@@ -146,16 +146,17 @@
 	Note.prototype.start = function(){
 	  // this.osc.connect(audioContext.destination);
 	  this.gainNode.gain.value = 0.3;
-	}
+	  console.log(this.noteName);
+	};
 	
 	Note.prototype.stop = function(){
 	  // this.osc.disconnect(audioContext.destination);
 	  this.gainNode.gain.value = 0;
-	}
+	};
 	
 	Note.prototype.name = function(){
 	  return this.noteName;
-	}
+	};
 	
 	Note.prototype.frequency = function () {
 	  return freq[this.noteName];
@@ -293,11 +294,11 @@
 	const Scales = __webpack_require__(6);
 	const Transpose = __webpack_require__(7);
 	
-	const keyMatch = ['a','s','d','f','g','h','j','k','l'];
+	const keyMatch = ['KeyA','KeyS','KeyD','KeyF','KeyF','KeyH','KeyJ','KeyK','KeyL'];
 	
 	
 	function generateNotes(scale, rootNote){
-	  let allNotes = []
+	  let allNotes = [];
 	  let totalInt = 0;
 	  for (let i = 0; i < Scales[scale].length; i++){
 	    totalInt += Scales[scale][i];
@@ -316,7 +317,7 @@
 	Keyboard.prototype.showKeys = function () {
 	  this.notes.forEach(note => {
 	    console.log(note);
-	  })
+	  });
 	};
 	
 	Keyboard.prototype.render = function (el) {
@@ -327,28 +328,33 @@
 	    newKey.style = "key";
 	    newKey.innerHTML = note.name();
 	    boardEl.appendChild(newKey);
-	  })
+	  });
 	
-	  document.addEventListener("keydown", function(event){
-	    event.preventDefault();
-	    console.log(event);
-	    idx = this.keyMatch.indexOf(event.key)
-	    if (idx > -1) {
-	      this.notes[idx].start();
-	    }
-	  }.bind(this))
+	  document.addEventListener("keydown", this.keydown.bind(this));
 	
-	  document.addEventListener("keyup", function(event){
-	    event.preventDefault();
-	    console.log(event);
-	    idx = this.keyMatch.indexOf(event.key)
-	    if (idx > -1) {
-	      this.notes[idx].stop();
-	    }
-	  }.bind(this))
+	  document.addEventListener("keyup", this.keyup.bind(this));
 	
 	  el.appendChild(boardEl);
 	};
+	
+	
+	Keyboard.prototype.keydown = function(event) {
+	  event.preventDefault();
+	  let idx = this.keyMatch.indexOf(event.code);
+	  if (idx > -1) {
+	    this.notes[idx].start();
+	  }
+	};
+	
+	Keyboard.prototype.keyup = function(event){
+	  event.preventDefault();
+	  let idx = this.keyMatch.indexOf(event.code);
+	  if (idx > -1) {
+	    this.notes[idx].stop();
+	  }
+	};
+	
+	
 	
 	module.exports = Keyboard;
 	window.Keyboard = Keyboard;
@@ -359,7 +365,8 @@
 /***/ function(module, exports) {
 
 	module.exports = {
-	  major: [0, 2, 2, 1, 2, 2, 2, 1]
+	  major: [0, 2, 2, 1, 2, 2, 2, 1],
+	  minor: [0, 2, 1, 2, 2, 1, 2, 2]
 	}
 
 

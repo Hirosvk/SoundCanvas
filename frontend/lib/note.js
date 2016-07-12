@@ -1,7 +1,7 @@
 const freq = require('../constants/notes.js');
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-const Note = function(noteName){
+function Note (noteName){
   this.noteName = noteName;
   this.osc = audioContext.createOscillator();
   this.osc.frequency.value = freq[noteName];
@@ -15,16 +15,17 @@ const Note = function(noteName){
 Note.prototype.start = function(){
   // this.osc.connect(audioContext.destination);
   this.gainNode.gain.value = 0.3;
-}
+  console.log(this.noteName);
+};
 
 Note.prototype.stop = function(){
   // this.osc.disconnect(audioContext.destination);
   this.gainNode.gain.value = 0;
-}
+};
 
 Note.prototype.name = function(){
   return this.noteName;
-}
+};
 
 Note.prototype.frequency = function () {
   return freq[this.noteName];
