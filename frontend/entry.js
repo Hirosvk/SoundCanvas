@@ -1,9 +1,21 @@
-
+const Circle = require('./lib/circle.js');
 
 document.addEventListener("DOMContentLoaded", function(){
   const canvasEl = document.getElementById('canvas');
-  debugger;
   const field = canvasEl.getContext('2d');
-  field.fillStyle = "red";
-  field.fillRect(100, 100, 400, 300)
+
+  const options = {
+    pos: [100, 100],
+    vel: [1,1],
+    rad: 10,
+    color: 'red'
+  }
+
+  const circle1 = new Circle (options)
+
+  setInterval(function(field){
+    circle1.move();
+    circle1.render()
+  }.bind(this, field), 1000)
+
 })

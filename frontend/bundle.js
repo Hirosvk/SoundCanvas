@@ -42,17 +42,55 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	
+	const Circle = __webpack_require__(1);
 	
 	document.addEventListener("DOMContentLoaded", function(){
 	  const canvasEl = document.getElementById('canvas');
-	  debugger;
 	  const field = canvasEl.getContext('2d');
-	  field.fillStyle = "red";
-	  field.fillRect(100, 100, 400, 300)
+	
+	  const options = {
+	    pos: [100, 100],
+	    vel: [1,1],
+	    rad: 10,
+	    color: 'red'
+	  }
+	
+	  const circle1 = new Circle (options)
+	
+	  setInterval(function(field){
+	    circle1.move();
+	    circle1.render()
+	  }.bind(this, field), 1000)
+	
 	})
+
+
+/***/ },
+/* 1 */
+/***/ function(module, exports) {
+
+	function Circle (options){
+	  this.pos = options.pos;
+	  this.vel = options.vel;
+	  this.rad = options.rad;
+	  this.color = options.color;
+	}
+	
+	Circle.prototype.move = function(){
+	  this.pos[0] = this.pos[0] + this.vel[0];
+	  this.pos[1] = this.pos[1] + this.vel[1];
+	}
+	
+	Circle.prototype.render = function(ctx){
+	  ctx.beginPath();
+	  ctx.arc(this.pos[0], this.pos[1], this.rad, 0, Math.PI * 2);
+	  ctx.fillStyle = this.color;
+	  ctx.fill();
+	}
+	
+	module.exports = Circle;
 
 
 /***/ }
