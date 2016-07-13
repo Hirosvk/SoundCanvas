@@ -1,8 +1,9 @@
 const Note = require('./note.js');
 const Scales = require('../constants/scales.js');
 const Transpose = require('../utils/transpose.js');
+const KickDrum = require('./drum.js').KickDrum;
 
-const keyMatch = ['KeyA','KeyS','KeyD','KeyF','KeyF','KeyH','KeyJ','KeyK','KeyL'];
+const keyMatch = ['KeyA','KeyS','KeyD','KeyF','KeyG','KeyH','KeyJ','KeyK','KeyL'];
 
 
 function generateNotes(scale, rootNote){
@@ -17,9 +18,10 @@ function generateNotes(scale, rootNote){
 }
 
 
-function Keyboard(scale, rootNote, octav){
+function Keyboard(scale, rootNote, octav, trackerStore){
   this.notes = generateNotes(scale, rootNote);
   this.keyMatch = keyMatch.slice(0, this.notes.length);
+  this.trackerStore = [];
 }
 
 Keyboard.prototype.showKeys = function () {
@@ -27,6 +29,7 @@ Keyboard.prototype.showKeys = function () {
     console.log(note);
   });
 };
+
 
 Keyboard.prototype.render = function (el) {
   const boardEl = document.createElement('div');
@@ -51,6 +54,7 @@ Keyboard.prototype.keydown = function(event) {
   let idx = this.keyMatch.indexOf(event.code);
   if (idx > -1) {
     this.notes[idx].start();
+    this.trackerStore.push(this.note.name());
   }
 };
 

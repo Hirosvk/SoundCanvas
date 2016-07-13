@@ -1,10 +1,14 @@
 const freq = require('../constants/notes.js');
-const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const audioContext = require('../constants/audio_context.js');
 
 function Note (noteName){
+  let frequency;
+  if (typeof noteName === 'number'){
+    frequency = noteName;
+  }
   this.noteName = noteName;
   this.osc = audioContext.createOscillator();
-  this.osc.frequency.value = freq[noteName];
+  this.osc.frequency.value = frequency || freq[noteName];
   this.gainNode = audioContext.createGain();
   this.gainNode.gain.value = 0;
   this.osc.connect(this.gainNode);
@@ -14,6 +18,9 @@ function Note (noteName){
 
 Note.prototype.start = function(){
   // this.osc.connect(audioContext.destination);
+  // when connecting/disconnecting to 'destination' to start/stop the note,
+  // it made unplesant noise. Controlling gained worked better in terms of
+  // sound quality.
   this.gainNode.gain.value = 0.3;
   console.log(this.noteName);
 };
@@ -31,9 +38,5 @@ Note.prototype.frequency = function () {
   return freq[this.noteName];
 };
 
-// Note.play = function(noteName){
-//   const note = new Note(noteName);
-//   return note.start();
-// }
-
 module.exports = Note;
+window.Note = Note;

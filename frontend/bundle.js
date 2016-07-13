@@ -47,6 +47,8 @@
 	const Field = __webpack_require__(1);
 	const Note = __webpack_require__(3);
 	const Keyboard = __webpack_require__(5);
+	const BeatMaker = __webpack_require__(11);
+	const KickDrum = __webpack_require__(8).KickDrum;
 	
 	document.addEventListener("DOMContentLoaded", function(){
 	  const canvasEl = document.getElementById('canvas');
@@ -58,9 +60,12 @@
 	  const keyboarFrame = document.getElementById('keyboard-frame');
 	  const keyboard = new Keyboard('major', 'C4');
 	  keyboard.render(keyboarFrame);
+	  const kickDrum = new KickDrum();
+	  const beatMaker = new BeatMaker(40, "FourBeat2", kickDrum);
+	  beatMaker.setup(document.getElementById('beat-maker'));
 	
 	
-	})
+	});
 
 
 /***/ },
@@ -130,12 +135,16 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	const freq = __webpack_require__(4);
-	const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+	const audioContext = __webpack_require__(10);
 	
 	function Note (noteName){
+	  let frequency;
+	  if (typeof noteName === 'number'){
+	    frequency = noteName;
+	  }
 	  this.noteName = noteName;
 	  this.osc = audioContext.createOscillator();
-	  this.osc.frequency.value = freq[noteName];
+	  this.osc.frequency.value = frequency || freq[noteName];
 	  this.gainNode = audioContext.createGain();
 	  this.gainNode.gain.value = 0;
 	  this.osc.connect(this.gainNode);
@@ -145,6 +154,9 @@
 	
 	Note.prototype.start = function(){
 	  // this.osc.connect(audioContext.destination);
+	  // when connecting/disconnecting to 'destination' to start/stop the note,
+	  // it made unplesant noise. Controlling gained worked better in terms of
+	  // sound quality.
 	  this.gainNode.gain.value = 0.3;
 	  console.log(this.noteName);
 	};
@@ -162,12 +174,8 @@
 	  return freq[this.noteName];
 	};
 	
-	// Note.play = function(noteName){
-	//   const note = new Note(noteName);
-	//   return note.start();
-	// }
-	
 	module.exports = Note;
+	window.Note = Note;
 
 
 /***/ },
@@ -283,7 +291,7 @@
 	  A8:	7040.00,
 	  Bb8: 7458.62,
 	  B8:	7902.13
-	}
+	};
 
 
 /***/ },
@@ -293,8 +301,9 @@
 	const Note = __webpack_require__(3);
 	const Scales = __webpack_require__(6);
 	const Transpose = __webpack_require__(7);
+	const KickDrum = __webpack_require__(8).KickDrum;
 	
-	const keyMatch = ['KeyA','KeyS','KeyD','KeyF','KeyF','KeyH','KeyJ','KeyK','KeyL'];
+	const keyMatch = ['KeyA','KeyS','KeyD','KeyF','KeyG','KeyH','KeyJ','KeyK','KeyL'];
 	
 	
 	function generateNotes(scale, rootNote){
@@ -309,9 +318,10 @@
 	}
 	
 	
-	function Keyboard(scale, rootNote, octav){
+	function Keyboard(scale, rootNote, octav, trackerStore){
 	  this.notes = generateNotes(scale, rootNote);
 	  this.keyMatch = keyMatch.slice(0, this.notes.length);
+	  this.trackerStore = [];
 	}
 	
 	Keyboard.prototype.showKeys = function () {
@@ -319,6 +329,7 @@
 	    console.log(note);
 	  });
 	};
+	
 	
 	Keyboard.prototype.render = function (el) {
 	  const boardEl = document.createElement('div');
@@ -343,6 +354,7 @@
 	  let idx = this.keyMatch.indexOf(event.code);
 	  if (idx > -1) {
 	    this.notes[idx].start();
+	    this.trackerStore.push(this.note.name());
 	  }
 	};
 	
@@ -398,6 +410,137 @@
 	
 	  }
 	}
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// Function.prototype.inherits = function (parent) {
+	//   const Surrogate = function(){};
+	//   Surrogate.prototype = parente.prototype;
+	//   this.prototype = new Surrogate ();
+	//   this.prototype.constructor = this
+	// };
+	
+	const DrumSounds = __webpack_require__(9);
+	const audioContext = __webpack_require__(10);
+	
+	function KickDrum (){
+	
+	}
+	
+	KickDrum.prototype.name = function(){
+	  return "Kick Drum";
+	};
+	
+	KickDrum.prototype.start = function() {
+	  this.osc = audioContext.createOscillator();
+	  this.gainNode = audioContext.createGain();
+	  this.osc.connect(this.gainNode);
+	  this.gainNode.connect(audioContext.destination);
+	
+	  const now = audioContext.currentTime;
+	
+	  this.osc.frequency.setValueAtTime(150, now);
+		this.gainNode.gain.setValueAtTime(5, now);
+	
+		this.osc.frequency.exponentialRampToValueAtTime(0.01, now + 0.5);
+		this.gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+		this.osc.start(now);
+	
+		this.osc.stop(now + 0.5);
+	};
+	
+	KickDrum.prototype.stop = function () {
+	  // does nothing
+	};
+	
+	module.exports = {
+	  KickDrum: KickDrum
+	};
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
+	module.exports = {
+	  kickDrum: {
+	    freq: 150
+	  }
+	};
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+	module.exports = new (window.AudioContext || window.webkitAudioContext)();
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const KickDrum = __webpack_require__(8).KickDrum;
+	const BeatPatterns = __webpack_require__(12);
+	
+	function BeatMaker(tempo, pattern, drum){
+	  this.tempo = tempo;
+	  this.pattern = BeatPatterns[pattern];
+	  this.drum = drum;
+	}
+	
+	BeatMaker.prototype.setup = function(parentEl){
+	  let startButton = document.createElement('button');
+	  startButton.innerHTML = "start beat";
+	  startButton.addEventListener("click", function(event){
+	    event.preventDefault();
+	    this.start();
+	  }.bind(this));
+	
+	  let stopButton = document.createElement('button');
+	  stopButton.innerHTML = "stop beat";
+	  stopButton.addEventListener("click", function(event){
+	    event.preventDefault();
+	    this.stop();
+	  }.bind(this));
+	  parentEl.appendChild(startButton);
+	  parentEl.appendChild(stopButton);
+	};
+	
+	BeatMaker.prototype.manageBeat = function () {
+	  this.idx = this.idx || 0;
+	  if (this.pattern[this.idx]){
+	    this.drum.start();
+	  }
+	  this.idx = (this.idx === this.pattern.length - 1) ? 0 : this.idx + 1;
+	};
+	
+	
+	BeatMaker.prototype.start = function () {
+	  let interval = (this.tempo / 60) / (this.pattern.length / 4) * 1000;
+	  this.currentBeat = setInterval(this.manageBeat.bind(this), interval);
+	};
+	
+	BeatMaker.prototype.stop = function () {
+	  if (this.currentBeat) { clearInterval(this.currentBeat); }
+	};
+	
+	
+	module.exports = BeatMaker;
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	module.exports = {
+	  FourBeat: [1,1,1,1],
+	  FourBeat2: [0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1]
+	};
+	// each array is one bar
 
 
 /***/ }
