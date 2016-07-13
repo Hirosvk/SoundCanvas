@@ -1,10 +1,3 @@
-// Function.prototype.inherits = function (parent) {
-//   const Surrogate = function(){};
-//   Surrogate.prototype = parente.prototype;
-//   this.prototype = new Surrogate ();
-//   this.prototype.constructor = this
-// };
-
 const DrumSounds = require('../constants/drum_sounds.js');
 const audioContext = require('../constants/audio_context.js');
 
@@ -25,7 +18,7 @@ KickDrum.prototype.start = function() {
   const now = audioContext.currentTime;
 
   this.osc.frequency.setValueAtTime(150, now);
-	this.gainNode.gain.setValueAtTime(5, now);
+	this.gainNode.gain.setValueAtTime(2, now);
 
 	this.osc.frequency.exponentialRampToValueAtTime(0.01, now + 0.5);
 	this.gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);

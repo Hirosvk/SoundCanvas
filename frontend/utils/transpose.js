@@ -1,13 +1,19 @@
 const notes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
 module.exports = {
-  interval(low, high){
-    const _low = low.match(/([A-Gb]+)(\d)/);
-    const lNote = _low[1];
-    const lNum = _low[2];
+  interval(noteA, noteB){
+    const _noteA = noteA.match(/([A-Gb]+)(\d)/);
+    const _noteB = noteB.match(/([A-Gb]+)(\d)/);
+    let hNote, hNum, lNote, lNum;
 
-    const _high = high.match(/([A-Gb]+)(\d)/);
-    const hNote = _high[1];
-    const hNum = _high[2];
+    if(
+      ( notes.indexOf(_noteB[1]) > notes.indexOf(_noteA[1]) && _noteB[2] === _noteA[2] ) ||
+      (_noteB[2] > _noteA[2])){
+      lNote = _noteA[1]; lNum = _noteA[2];
+      hNote = _noteB[1]; hNum = _noteB[2];
+    } else {
+      hNote = _noteA[1]; hNum = _noteA[2];
+      lNote = _noteB[1]; lNum = _noteB[2];
+    }
 
     return notes.indexOf(hNote) - notes.indexOf(lNote) + ((hNum - lNum) * 12);
   },

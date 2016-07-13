@@ -1,22 +1,24 @@
-const Field = require('./lib/field.js');
-const Note = require('./lib/note.js');
-const Keyboard = require('./lib/keyboard.js');
-const BeatMaker = require('./lib/beat_maker.js');
-const KickDrum = require('./lib/drum.js').KickDrum;
+const Canvas = require('./lib/canvas.js');
+const MusicTracker = require('./lib/music_tracker.js');
+const GameUI = require('./lib/game_ui.js');
 
 document.addEventListener("DOMContentLoaded", function(){
+  const gameUI = new GameUI();
+
   const canvasEl = document.getElementById('canvas');
-  const ctx = canvasEl.getContext('2d');
-  const field = new Field(
-    [canvasEl.width, canvasEl.height]
-  ).animate(ctx);
+  gameUI.setupCanvas(canvasEl, [canvasEl.width, canvasEl.height]);
 
-  const keyboarFrame = document.getElementById('keyboard-frame');
-  const keyboard = new Keyboard('major', 'C4');
-  keyboard.render(keyboarFrame);
-  const kickDrum = new KickDrum();
-  const beatMaker = new BeatMaker(40, "FourBeat2", kickDrum);
-  beatMaker.setup(document.getElementById('beat-maker'));
-
+  const musicFrame = document.getElementById('music-tracker');
+  musicOptions = {
+    keyboard:  {
+      scale: "major",
+      root: "C4"
+    },
+    beatMaker: {
+      tempo: 60,
+      pattern: "FourBeat"
+    }
+  }
+  gameUI.setupMusicTracker(musicFrame, musicOptions);
 
 });

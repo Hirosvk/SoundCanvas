@@ -6,22 +6,22 @@ const KickDrum = require('./drum.js').KickDrum;
 const keyMatch = ['KeyA','KeyS','KeyD','KeyF','KeyG','KeyH','KeyJ','KeyK','KeyL'];
 
 
-function generateNotes(scale, rootNote){
+function generateNotes(scale, root){
   let allNotes = [];
   let totalInt = 0;
   for (let i = 0; i < Scales[scale].length; i++){
     totalInt += Scales[scale][i];
-    let newNoteName = Transpose.getNote(rootNote, totalInt);
+    let newNoteName = Transpose.getNote(root, totalInt);
     allNotes.push(new Note(newNoteName));
   }
   return allNotes;
 }
 
 
-function Keyboard(scale, rootNote, octav, trackerStore){
-  this.notes = generateNotes(scale, rootNote);
+function Keyboard(options){
+  this.notes = generateNotes(options.scale, options.root);
   this.keyMatch = keyMatch.slice(0, this.notes.length);
-  this.trackerStore = [];
+  this.updateNotes = options.updateNotes;
 }
 
 Keyboard.prototype.showKeys = function () {
@@ -31,13 +31,13 @@ Keyboard.prototype.showKeys = function () {
 };
 
 
-Keyboard.prototype.render = function (el) {
+Keyboard.prototype.setup = function (el) {
   const boardEl = document.createElement('div');
   boardEl.style = 'keyboard';
   this.notes.forEach((note, idx) => {
     let newKey = document.createElement('span');
     newKey.style = "key";
-    newKey.innerHTML = note.name();
+    newKey.innerHTML = note.name;
     boardEl.appendChild(newKey);
   });
 
@@ -54,7 +54,7 @@ Keyboard.prototype.keydown = function(event) {
   let idx = this.keyMatch.indexOf(event.code);
   if (idx > -1) {
     this.notes[idx].start();
-    this.trackerStore.push(this.note.name());
+    this.updateNotes(this.notes[idx].name);
   }
 };
 
