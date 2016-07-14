@@ -3,7 +3,7 @@ const Transpose = require('../utils/transpose.js');
 const Triangle = require('./triangle.js');
 const ColorTile = require('./color_tile.js');
 
-const Center = [10,10];
+let Pos = [[15,15],[15,15],[15,15],[15,15],[15,15],[15,15]];
 let DirCode = 0;
 
 function Canvas(ctx, dims){
@@ -25,6 +25,19 @@ Canvas.prototype.setupGrid = function (triDim) {
   }
 };
 
+Canvas.prototype.receiveNotes = function (notes) {
+  this.notesToTiles(notes);
+};
+
+Canvas.prototype.notesToTiles = function (notes){
+  let colors = this.generateColors(notes);
+  colors.forEach( color => {
+    this.addColorTile(Pos[DirCode], color, DirCode);
+    if (DirCode === 5){ DirCode = 0; }
+    else { DirCode++; }
+  });
+};
+
 Canvas.prototype.addColorTile = function (pos, color, dirCode){
   let tile = new ColorTile(pos, color, dirCode);
   this.grid[pos].receiveColorTile(tile);
@@ -40,17 +53,7 @@ Canvas.prototype.generateColors = function (notes) {
   return intervals.map(int => Colors[int]);
 };
 
-Canvas.prototype.receiveNotes = function (notes) {
-  console.log(this.generateColors(notes));
-};
 
-Canvas.prototype.notesToTiles = function (notes){
-  let colors = this.generateColors(notes);
-  colors.forEach( color => {
-    this.addColorTile(Center, color, )
-    
-  })
-};
 
 Canvas.prototype.render = function () {
   let anchor = [0,0];
@@ -89,12 +92,6 @@ Canvas.prototype.render = function () {
   }
 };
 
-
-
-
-// Canvas.prototype.addCircle = function (options) {
-//   this.elements.push(new Circle (options));
-// };
 
 
 Canvas.prototype.moveColorTiles = function () {

@@ -44,7 +44,7 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const Canvas = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"./lib/canvas.js\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+	const Canvas = __webpack_require__(1);
 	const MusicTracker = __webpack_require__(5);
 	const GameUI = __webpack_require__(15);
 	
@@ -53,8 +53,7 @@
 	
 	  const canvasEl = document.getElementById('canvas');
 	  gameUI.setupCanvas(canvasEl, [canvasEl.width, canvasEl.height]);
-	  gameUI.setupCanvasGrid(50);
-	  window.canvas = gameUI.canvas;
+	  gameUI.setupCanvasGrid(30);
 	
 	  const musicFrame = document.getElementById('music-tracker');
 	  const musicOptions = {
@@ -64,20 +63,171 @@
 	    },
 	    beatMaker: {
 	      tempo: 60,
-	      pattern: "FourBeat"
+	      pattern: "FourBeat2"
 	    }
 	  };
 	  gameUI.setupMusicTracker(musicFrame, musicOptions);
 	
-	
+	  gameUI.animateCanvas();
 	
 	});
 
 
 /***/ },
-/* 1 */,
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const Colors = __webpack_require__(3);
+	const Transpose = __webpack_require__(4);
+	const Triangle = __webpack_require__(16);
+	const ColorTile = __webpack_require__(18);
+	
+	let Pos = [[15,15],[15,15],[15,15],[15,15],[15,15],[15,15]];
+	let DirCode = 0;
+	
+	function Canvas(ctx, dims){
+	  this.ctx = ctx;
+	  this.dims = dims;
+	}
+	
+	Canvas.prototype.setupGrid = function (triDim) {
+	  this.grid = {};
+	  this.triDim = triDim;
+	  this.cosDim = Math.floor(triDim * 0.866);
+	  this.rowLength = Math.floor(this.dims[0]/this.triDim) * 2;
+	  this.colLength = Math.floor(this.dims[1]/this.cosDim);
+	
+	  for (let y = 0; y <= this.colLength; y++){
+	    for(let x = 0; x <= this.rowLength + 1; x++){
+	      this.grid[[x,y]] = new Triangle([x,y]);
+	    }
+	  }
+	};
+	
+	Canvas.prototype.receiveNotes = function (notes) {
+	  this.notesToTiles(notes);
+	};
+	
+	Canvas.prototype.notesToTiles = function (notes){
+	  let colors = this.generateColors(notes);
+	  colors.forEach( color => {
+	    this.addColorTile(Pos[DirCode], color, DirCode);
+	    if (DirCode === 5){ DirCode = 0; }
+	    else { DirCode++; }
+	  });
+	};
+	
+	Canvas.prototype.addColorTile = function (pos, color, dirCode){
+	  let tile = new ColorTile(pos, color, dirCode);
+	  this.grid[pos].receiveColorTile(tile);
+	};
+	
+	Canvas.prototype.generateColors = function (notes) {
+	  let intervals = [];
+	  for(let i = 0; i < notes.length -1; i++){
+	    for(let j = i+1; j < notes.length; j++){
+	      intervals.push(Transpose.interval(notes[i], notes[j]));
+	    }
+	  }
+	  return intervals.map(int => Colors[int]);
+	};
+	
+	
+	
+	Canvas.prototype.render = function () {
+	  let anchor = [0,0];
+	  let _x = 0;
+	
+	  for (let y = 0; y <= this.colLength; y++){
+	    for(let x = 0; x <= this.rowLength + 1; x++){
+	      let row = [];
+	      if (x % 2 === 1){
+	        this.ctx.beginPath();
+	        this.ctx.moveTo(anchor[0], anchor[1]);
+	        this.ctx.lineTo(anchor[0] + Math.floor(this.triDim/2), anchor[1] + this.cosDim);
+	        this.ctx.lineTo(anchor[0] + this.triDim, anchor[1]);
+	      } else {
+	        this.ctx.beginPath();
+	        this.ctx.moveTo(anchor[0], anchor[1]);
+	        this.ctx.lineTo(anchor[0] - Math.floor(this.triDim/2), anchor[1] + this.cosDim);
+	        this.ctx.lineTo(anchor[0] + Math.floor(this.triDim/2), anchor[1] + this.cosDim);
+	      }
+	      if (this.grid[[x+_x, y]]) {
+	        this.ctx.fillStyle = this.grid[[x+_x, y]].getColor();
+	        this.ctx.fill();
+	      } else {
+	        this.ctx.closePath();
+	      }
+	      anchor[0] += (this.triDim * (x % 2));
+	    }
+	    if (y % 2 === 0){
+	      anchor[0] = -(Math.floor(this.triDim/2));
+	      _x = -1;
+	    } else {
+	      anchor[0] = 0;
+	      _x = 0;
+	    }
+	    anchor[1] += this.cosDim;
+	  }
+	};
+	
+	
+	
+	Canvas.prototype.moveColorTiles = function () {
+	  let leavingTiles = [];
+	  for (let y = 0; y <= this.colLength; y++){
+	    for(let x = 0; x <= this.rowLength + 1; x++){
+	      leavingTiles = leavingTiles.concat(this.grid[[x,y]].emitColorTiles());
+	    }
+	  }
+	  leavingTiles.forEach( tile => {
+	    if (this.grid[tile.pos]){
+	      this.grid[tile.pos].receiveColorTile(tile);
+	    }
+	  });
+	};
+	
+	Canvas.prototype.renderFrame = function () {
+	  this.render();
+	  this.moveColorTiles();
+	};
+	
+	Canvas.prototype.animate = function(){
+	  this.animation = setInterval(this.renderFrame.bind(this), 100);
+	};
+	
+	Canvas.prototype.stopAnimation = function(){
+	  clearInterval(this.animation);
+	};
+	
+	module.exports = Canvas;
+	window.Canvas = Canvas;
+
+
+/***/ },
 /* 2 */,
-/* 3 */,
+/* 3 */
+/***/ function(module, exports) {
+
+	module.exports = {
+	  0: '#000000',
+	  1: '#000000',
+	  2: '#FF0080', //2
+	  3: '#00FFFF', //-3
+	  4: '#FFFF00', //3
+	  5: '#0000FF', //4
+	  6: '#8000FF', //tritone
+	  7: '#FF0000', //5
+	  8: '#FF00FF', //-6
+	  9: '#00FF00', //6
+	  10: '#0080FF', //-7
+	  11: '#00FF80',
+	  12: '#FF8000',
+	  14: '#80FF00'//9th
+	};
+
+
+/***/ },
 /* 4 */
 /***/ function(module, exports) {
 
@@ -555,7 +705,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	const MusicTracker = __webpack_require__(5);
-	const Canvas = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"./canvas.js\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+	const Canvas = __webpack_require__(1);
 	
 	function GameUI(){
 	}
@@ -582,13 +732,147 @@
 	  this.canvas.setupGrid(triDim);
 	};
 	
-	GameUI.prototype.showTriangle = function (pos){
-	  console.log(this.canvas.getTriangle(pos));
+	GameUI.prototype.animateCanvas = function() {
+	  this.canvas.animate();
 	};
 	
 	
 	module.exports = GameUI;
 	window.GameUI = GameUI;
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const ColorBlender = __webpack_require__(17);
+	
+	function Triangle(pos){
+	  this.pos = pos;
+	  this.reset();
+	}
+	
+	Triangle.prototype.reset = function () {
+	  this.color = '#FFFFFF';
+	  this.colorTiles = [];
+	  this.inColors = ['#FFFFFF'];
+	};
+	
+	Triangle.prototype.getColor = function () {
+	  this.color = ColorBlender.blend(this.inColors); // called on render
+	  return this.color;
+	};
+	
+	
+	Triangle.prototype.emitColorTiles = function () {
+	  const leavingTiles = this.colorTiles.map( tile => {
+	    tile.color = this.color;
+	    tile.newPos();
+	    return tile;
+	  });
+	  this.reset();
+	  return leavingTiles.filter(function(tile){
+	    if (!tile.pos) { return false; }
+	    return true;
+	  });
+	};
+	
+	Triangle.prototype.receiveColorTile = function (colorTile) {
+	  for (let i = 0; i < 3; i++) {this.inColors.push(colorTile.color);}
+	  this.colorTiles.push(colorTile);
+	}; 
+	
+	module.exports = Triangle;
+	window.Triangle = Triangle;
+
+
+/***/ },
+/* 17 */
+/***/ function(module, exports) {
+
+	const ColorBlender = {
+	  blend(colors){
+	    let r = 0, g = 0, b = 0;
+	    colors.forEach(color => {
+	      r += this.toBase10Int(color[1])*16 + this.toBase10Int(color[2]);
+	      g += this.toBase10Int(color[3])*16 + this.toBase10Int(color[4]);
+	      b += this.toBase10Int(color[5])*16 + this.toBase10Int(color[6]);
+	    });
+	    let mR = parseInt(r/colors.length);
+	    let resultR = this.toHex(parseInt(mR / 16)) + this.toHex(mR % 16);
+	    let mG = parseInt(g/colors.length);
+	    let resultG = this.toHex(parseInt(mG / 16)) + this.toHex(mG % 16);
+	
+	    let mB = parseInt(b/colors.length);
+	    let resultB = this.toHex(parseInt(mB / 16)) + this.toHex(mB % 16);
+	    return `#${resultR}${resultG}${resultB}`;
+	  },
+	
+	  toBase10Int(hex){
+	    if (hex.match(/\d/)){
+	      return parseInt(hex);
+	    } else {
+	      return hex.charCodeAt(0) - 55;
+	    }
+	  },
+	
+	  toHex(int){
+	    if (int < 10){
+	      return int.toString();
+	    } else {
+	      return String.fromCharCode(int + 55);
+	    }
+	  }
+	};
+	
+	module.exports = ColorBlender;
+
+
+/***/ },
+/* 18 */
+/***/ function(module, exports) {
+
+	const Dir = {
+	  0: {
+	    up: [1,0],
+	    down: [1,0]
+	  },
+	  1: {
+	    up: [1,0],
+	    down: [0,-1]
+	  },
+	  2: {
+	    up: [-1,0],
+	    down: [0,-1]
+	  },
+	  3: {
+	    up: [-1,0],
+	    down: [-1,0]
+	  },
+	  4: {
+	    up: [0,1],
+	    down: [-1,0]
+	  },
+	  5: {
+	    up: [0,1],
+	    down: [1,0]
+	  }
+	};
+	
+	
+	function ColorTile(pos, color, dirCode){
+	  this.pos = pos;
+	  this.color = color;
+	  this.path = Dir[dirCode];
+	}
+	
+	ColorTile.prototype.newPos = function () {
+	  if (this.color === '#FFFFFF'){ this.pos = 0; return; }
+	  const dir = ((this.pos[0] + this.pos[1]) % 2) ? 'down' : 'up';
+	  this.pos = [this.pos[0] + this.path[dir][0], this.pos[1] + this.path[dir][1]];
+	};
+	
+	module.exports = ColorTile;
 
 
 /***/ }

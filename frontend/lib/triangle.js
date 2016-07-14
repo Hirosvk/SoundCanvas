@@ -28,13 +28,12 @@ Triangle.prototype.emitColorTiles = function () {
     if (!tile.pos) { return false; }
     return true;
   });
-}; // called right after render
+};
 
 Triangle.prototype.receiveColorTile = function (colorTile) {
   for (let i = 0; i < 3; i++) {this.inColors.push(colorTile.color);}
   this.colorTiles.push(colorTile);
-}; // called after render
-
+}; 
 
 module.exports = Triangle;
 window.Triangle = Triangle;

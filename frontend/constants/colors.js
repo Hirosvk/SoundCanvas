@@ -13,20 +13,4 @@ module.exports = {
   11: '#00FF80',
   12: '#FF8000',
   14: '#80FF00'//9th
-
-
 };
-
-// 0 	#ff0000 red
-// 60 #ffff00 yellow
-// 120 #00ff00 green
-// 180 #00ffff light blue
-// 240 #0000FF blue
-// 300 #ff00ff pink/purple
-
-// 30:
-// 90:
-// 150:
-// 210:
-// 270:
-// 330:

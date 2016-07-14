@@ -26,8 +26,8 @@ GameUI.prototype.setupCanvasGrid = function (triDim) {
   this.canvas.setupGrid(triDim);
 };
 
-GameUI.prototype.showTriangle = function (pos){
-  console.log(this.canvas.getTriangle(pos));
+GameUI.prototype.animateCanvas = function() {
+  this.canvas.animate();
 };
 
 
