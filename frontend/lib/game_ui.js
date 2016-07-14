@@ -26,27 +26,41 @@ GameUI.prototype.setupCanvas = function (canvasEl, dims) {
 };
 
 
-GameUI.prototype.setupButtons = function (dashboardEl) {
-  let startButton = document.createElement('button');
+GameUI.prototype.setupSelects = function () {
 
-  startButton.innerHTML = "start";
-  startButton.setAttribute("id","start-button");
-  startButton.addEventListener("click", function(event){
-    event.preventDefault();
-    this.start();
-  }.bind(this));
-  dashboardEl.appendChild(startButton);
-
-  let stopButton = document.createElement('button');
-  stopButton.innerHTML = "stop";
-  stopButton.setAttribute("id","stop-button");
-  stopButton.addEventListener("click", function(event){
-    event.preventDefault();
-    this.stop();
-  }.bind(this));
-  dashboardEl.appendChild(stopButton);
 };
 
+GameUI.prototype.selectMaker = function () {
+
+};
+
+GameUI.prototype.updateTempo = function () {
+
+};
+GameUI.prototype.updateBeat = function () {
+
+};
+
+GameUI.prototype.demoSelector = function () {
+
+};
+
+GameUI.prototype.setupButtons = function (dashboardEl) {
+  dashboardEl.appendChild(this.buttonMaker("start-button", "Start", this.start));
+  dashboardEl.appendChild(this.buttonMaker("stop-button", "Stop", this.stop));
+  dashboardEl.appendChild(this.buttonMaker("clear-canvas-button", "Clear Canvas", this.clearCanvas));
+};
+
+GameUI.prototype.buttonMaker = function(id, text, callback) {
+  let button = document.createElement('button')
+  button.innerHTML = text;
+  button.setAttribute("id", id);
+  button.addEventListener("click", function(event){
+    event.preventDefault();
+    callback.call(this);
+  }.bind(this));
+  return button;
+};
 
 GameUI.prototype.start = function() {
   this.canvas.animate();
@@ -71,6 +85,9 @@ GameUI.prototype.unloadTrack = function () {
 GameUI.prototype.clearCanvas = function () {
   this.canvas.clearCanvas();
 };
+
+
+
 
 module.exports = GameUI;
 window.GameUI = GameUI;
