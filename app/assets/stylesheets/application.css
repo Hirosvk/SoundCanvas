@@ -13,3 +13,56 @@
  *= require_tree .
  *= require_self
  */
+
+div, span, p,
+select, li, ul,
+h1, h2, h3, h4, button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  color: #5C5C5C;
+  text-align: inherit;
+  text-decoration: inherit;
+  vertical-align: inherit;
+  box-sizing: inherit;
+  background: transparent;
+}
+
+body {
+  font-family: 'Architects Daughter', cursive;
+  width: 820px;
+}
+
+ul {
+  list-style: none;
+}
+
+button,
+input[type="submit"], a {
+  cursor: pointer;
+}
+
+h1 {
+  font-weight: bold;
+  font-size: 50px;
+  text-align: center;
+  margin: 10px;
+}
+
+h2 {
+  font-weight: bold;
+  font-size: x-large;
+}
+
+h3
+ {
+  font-weight: normal;
+  font-size: large;
+}
+
+h4 {
+  font-weight: normal;
+  font-size: medium;
+}

@@ -3,6 +3,7 @@ const Canvas = require('./canvas.js');
 const Tracks = require('../constants/tracks.js');
 
 function GameUI(){
+  this.active = false;
 }
 
 GameUI.prototype.receiveNotes = function (notes) {
@@ -29,6 +30,7 @@ GameUI.prototype.setupButtons = function (dashboardEl) {
   let startButton = document.createElement('button');
 
   startButton.innerHTML = "start";
+  startButton.setAttribute("id","start-button");
   startButton.addEventListener("click", function(event){
     event.preventDefault();
     this.start();
@@ -37,6 +39,7 @@ GameUI.prototype.setupButtons = function (dashboardEl) {
 
   let stopButton = document.createElement('button');
   stopButton.innerHTML = "stop";
+  stopButton.setAttribute("id","stop-button");
   stopButton.addEventListener("click", function(event){
     event.preventDefault();
     this.stop();
@@ -48,11 +51,13 @@ GameUI.prototype.setupButtons = function (dashboardEl) {
 GameUI.prototype.start = function() {
   this.canvas.animate();
   this.musicTracker.start();
+  document.getElementById("start-button").setAttribute("disabled", 'true');
 };
 
 GameUI.prototype.stop = function () {
   this.canvas.stopAnimation();
   this.musicTracker.stop();
+  document.getElementById("start-button").removeAttribute("disabled");
 };
 
 GameUI.prototype.loadTrack = function (track){

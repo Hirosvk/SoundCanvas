@@ -33,11 +33,11 @@ Keyboard.prototype.showKeys = function () {
 
 
 Keyboard.prototype.setupKeys = function (keyboardEl) {
-  const boardEl = document.createElement('div');
-  boardEl.style = 'keyboard';
+  const boardEl = document.createElement('ul');
+  boardEl.setAttribute("class", 'keyboard');
   this.notes.forEach((note, idx) => {
-    let newKey = document.createElement('span');
-    newKey.style = "key";
+    let newKey = document.createElement('li');
+    newKey.setAttribute("class", "key");
     newKey.innerHTML = `${note.name} : ${this.keyMatch[idx]}`;
     newKey.id = idx
     newKey.addEventListener("mousedown", this.pressKey.bind(this));
@@ -74,6 +74,7 @@ Keyboard.prototype.keydown = function(event) {
     if (this.notes[idx].start()){
       this.updateNotes(this.notes[idx].name);
     }
+    document.getElementById(idx).setAttribute("class", "key active");
   }
 };
 
@@ -87,6 +88,7 @@ Keyboard.prototype.keyup = function(event){
   }
   if (idx > -1) {
     this.notes[idx].stop();
+    document.getElementById(idx).setAttribute("class", "key");
   }
 };
 
