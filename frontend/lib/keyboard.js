@@ -6,20 +6,8 @@ const KickDrum = require('./drum.js').KickDrum;
 const keyMatch = ['KeyA','KeyS','KeyD','KeyF','KeyG','KeyH','KeyJ','KeyK','KeyL'];
 
 
-function generateNotes(scale, root){
-  let allNotes = [];
-  let totalInt = 0;
-  for (let i = 0; i < Scales[scale].length; i++){
-    totalInt += Scales[scale][i];
-    let newNoteName = Transpose.getNote(root, totalInt);
-    allNotes.push(new Note(newNoteName));
-  }
-  return allNotes;
-}
-
-
 function Keyboard(options){
-  this.notes = generateNotes(options.scale, options.root);
+  this.notes = Transpose.generateNotes(options.scale, options.root);
   this.keyMatch = keyMatch.slice(0, this.notes.length);
   this.updateNotes = options.updateNotes;
 }

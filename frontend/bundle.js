@@ -45,8 +45,8 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	const Canvas = __webpack_require__(1);
-	const MusicTracker = __webpack_require__(5);
-	const GameUI = __webpack_require__(15);
+	const MusicTracker = __webpack_require__(11);
+	const GameUI = __webpack_require__(17);
 	
 	document.addEventListener("DOMContentLoaded", function(){
 	  const gameUI = new GameUI();
@@ -63,7 +63,7 @@
 	    },
 	    beatMaker: {
 	      tempo: 60,
-	      pattern: "FourBeat2"
+	      pattern: "FourBeat"
 	    }
 	  };
 	  gameUI.setupMusicTracker(musicFrame, musicOptions);
@@ -77,13 +77,12 @@
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const Colors = __webpack_require__(3);
-	const Transpose = __webpack_require__(4);
-	const Triangle = __webpack_require__(16);
-	const ColorTile = __webpack_require__(18);
+	const Colors = __webpack_require__(2);
+	const Transpose = __webpack_require__(3);
+	const Triangle = __webpack_require__(8);
+	const ColorTile = __webpack_require__(10);
 	
-	let Pos = [[15,15],[15,15],[15,15],[15,15],[15,15],[15,15]];
-	let DirCode = 0;
+	let Pos = [[12,12],[9,9],[18,12],[9,15],[15,9],[6,12],[15,15]];
 	
 	function Canvas(ctx, dims){
 	  this.ctx = ctx;
@@ -110,10 +109,13 @@
 	
 	Canvas.prototype.notesToTiles = function (notes){
 	  let colors = this.generateColors(notes);
-	  colors.forEach( color => {
-	    this.addColorTile(Pos[DirCode], color, DirCode);
-	    if (DirCode === 5){ DirCode = 0; }
-	    else { DirCode++; }
+	  console.log(colors);
+	  notes.forEach( (note, nIdx) => {
+	    colors[note].forEach( (color, cIdx) => {
+	      this.addColorTile(Pos[nIdx], color, cIdx);
+	      // if (cIdx > 5) {debugger};
+	      // max notes.length is 7, max colors.length is 6;
+	    });
 	  });
 	};
 	
@@ -123,13 +125,17 @@
 	};
 	
 	Canvas.prototype.generateColors = function (notes) {
-	  let intervals = [];
-	  for(let i = 0; i < notes.length -1; i++){
-	    for(let j = i+1; j < notes.length; j++){
-	      intervals.push(Transpose.interval(notes[i], notes[j]));
-	    }
+	  let colors = {};
+	  // if (notes.length > 1) {debugger;}
+	  for(let i = 0; i < notes.length; i++){
+	    _notes = notes.slice();
+	    _notes.splice(i, 1);
+	    colors[notes[i]] = _notes.map( _note => {
+	      return Colors[Transpose.interval(notes[i], _note)]
+	    })
 	  }
-	  return intervals.map(int => Colors[int]);
+	  // if (notes.length > 2) {debugger}
+	  return colors
 	};
 	
 	
@@ -205,8 +211,7 @@
 
 
 /***/ },
-/* 2 */,
-/* 3 */
+/* 2 */
 /***/ function(module, exports) {
 
 	module.exports = {
@@ -228,10 +233,13 @@
 
 
 /***/ },
-/* 4 */
-/***/ function(module, exports) {
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
 
 	const notes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
+	const Scales = __webpack_require__(4);
+	const Note = __webpack_require__(5);
+	
 	module.exports = {
 	  interval(noteA, noteB){
 	    const _noteA = noteA.match(/([A-Gb]+)(\d)/);
@@ -258,8 +266,29 @@
 	
 	    const rIdx = notes.indexOf(rNote);
 	    return notes[(rIdx + interval)%12] + (parseInt(rNum) + Math.floor((rIdx + interval)/12)).toString();
+	  },
 	
+	  generateNotes(scale, root){
+	    let allNotes = [];
+	    let totalInt = 0;
+	    for (let i = 0; i < Scales[scale].length; i++){
+	      totalInt += Scales[scale][i];
+	      let newNoteName = this.getNote(root, totalInt);
+	      allNotes.push(new Note(newNoteName));
+	    }
+	    return allNotes;
 	  }
+	
+	}
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	module.exports = {
+	  major: [0, 2, 2, 1, 2, 2, 2, 1],
+	  minor: [0, 2, 1, 2, 2, 1, 2, 2]
 	}
 
 
@@ -267,142 +296,8 @@
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const Keyboard = __webpack_require__(6);
-	const BeatMaker = __webpack_require__(13);
-	
-	function MusicTracker (keyboardOptions, beatMakerOptions, passNotesToUI){
-	  this.passNotesToUI = passNotesToUI;
-	
-	  this.trackerStore = [];
-	  keyboardOptions.updateNotes = this.updateNotes.bind(this);
-	  this.keyboard = new Keyboard (keyboardOptions, this.trackerStore);
-	
-	  this.beatOn = false;
-	  beatMakerOptions.setListenStatus = this.setListenStatus.bind(this);
-	  beatMakerOptions.emitNotes = this.emitNotes.bind(this);
-	  this.beatMaker = new BeatMaker(beatMakerOptions);
-	}
-	
-	MusicTracker.prototype.setup = function (musicEl) {
-	  const keyboardEl = document.createElement('div');
-	  keyboardEl.style = 'keyboard-frame';
-	  this.keyboard.setup(keyboardEl);
-	  const beatMakerEl = document.createElement('div');
-	  beatMakerEl.style = 'beat-maker-frame';
-	  this.beatMaker.setup(beatMakerEl);
-	
-	  musicEl.appendChild(keyboardEl);
-	  musicEl.appendChild(beatMakerEl);
-	};
-	
-	MusicTracker.prototype.emitNotes = function(){
-	  console.log(this.trackerStore);
-	  this.passNotesToUI(this.trackerStore);
-	  this.clearStore();
-	};
-	
-	MusicTracker.prototype.clearStore = function(){
-	  this.trackerStore = [];
-	}
-	
-	MusicTracker.prototype.setListenStatus = function (boolean) {
-	  this.beatOn = boolean;
-	};
-	
-	MusicTracker.prototype.updateNotes = function (note) {
-	  if (this.beatOn){
-	    this.trackerStore.push(note);
-	  }
-	};
-	
-	module.exports = MusicTracker;
-
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	const Note = __webpack_require__(7);
-	const Scales = __webpack_require__(10);
-	const Transpose = __webpack_require__(4);
-	const KickDrum = __webpack_require__(11).KickDrum;
-	
-	const keyMatch = ['KeyA','KeyS','KeyD','KeyF','KeyG','KeyH','KeyJ','KeyK','KeyL'];
-	
-	
-	function generateNotes(scale, root){
-	  let allNotes = [];
-	  let totalInt = 0;
-	  for (let i = 0; i < Scales[scale].length; i++){
-	    totalInt += Scales[scale][i];
-	    let newNoteName = Transpose.getNote(root, totalInt);
-	    allNotes.push(new Note(newNoteName));
-	  }
-	  return allNotes;
-	}
-	
-	
-	function Keyboard(options){
-	  this.notes = generateNotes(options.scale, options.root);
-	  this.keyMatch = keyMatch.slice(0, this.notes.length);
-	  this.updateNotes = options.updateNotes;
-	}
-	
-	Keyboard.prototype.showKeys = function () {
-	  this.notes.forEach(note => {
-	    console.log(note);
-	  });
-	};
-	
-	
-	Keyboard.prototype.setup = function (el) {
-	  const boardEl = document.createElement('div');
-	  boardEl.style = 'keyboard';
-	  this.notes.forEach((note, idx) => {
-	    let newKey = document.createElement('span');
-	    newKey.style = "key";
-	    newKey.innerHTML = note.name;
-	    boardEl.appendChild(newKey);
-	  });
-	
-	  document.addEventListener("keydown", this.keydown.bind(this));
-	
-	  document.addEventListener("keyup", this.keyup.bind(this));
-	
-	  el.appendChild(boardEl);
-	};
-	
-	
-	Keyboard.prototype.keydown = function(event) {
-	  event.preventDefault();
-	  let idx = this.keyMatch.indexOf(event.code);
-	  if (idx > -1) {
-	    if (this.notes[idx].start()){
-	      this.updateNotes(this.notes[idx].name);
-	    }
-	  }
-	};
-	
-	Keyboard.prototype.keyup = function(event){
-	  event.preventDefault();
-	  let idx = this.keyMatch.indexOf(event.code);
-	  if (idx > -1) {
-	    this.notes[idx].stop();
-	  }
-	};
-	
-	
-	
-	module.exports = Keyboard;
-	window.Keyboard = Keyboard;
-
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	const freq = __webpack_require__(8);
-	const audioContext = __webpack_require__(9);
+	const freq = __webpack_require__(6);
+	const audioContext = __webpack_require__(7);
 	
 	function Note (name){
 	  this.name = name;
@@ -445,7 +340,7 @@
 
 
 /***/ },
-/* 8 */
+/* 6 */
 /***/ function(module, exports) {
 
 	module.exports = {
@@ -561,191 +456,17 @@
 
 
 /***/ },
-/* 9 */
+/* 7 */
 /***/ function(module, exports) {
 
 	module.exports = new (window.AudioContext || window.webkitAudioContext)();
 
 
 /***/ },
-/* 10 */
-/***/ function(module, exports) {
-
-	module.exports = {
-	  major: [0, 2, 2, 1, 2, 2, 2, 1],
-	  minor: [0, 2, 1, 2, 2, 1, 2, 2]
-	}
-
-
-/***/ },
-/* 11 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const DrumSounds = __webpack_require__(12);
-	const audioContext = __webpack_require__(9);
-	
-	function KickDrum (){
-	
-	}
-	
-	KickDrum.prototype.name = function(){
-	  return "Kick Drum";
-	};
-	
-	KickDrum.prototype.start = function() {
-	  this.osc = audioContext.createOscillator();
-	  this.gainNode = audioContext.createGain();
-	  this.osc.connect(this.gainNode);
-	  this.gainNode.connect(audioContext.destination);
-	
-	  const now = audioContext.currentTime;
-	
-	  this.osc.frequency.setValueAtTime(150, now);
-		this.gainNode.gain.setValueAtTime(2, now);
-	
-		this.osc.frequency.exponentialRampToValueAtTime(0.01, now + 0.5);
-		this.gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
-		this.osc.start(now);
-	
-		this.osc.stop(now + 0.5);
-	};
-	
-	KickDrum.prototype.stop = function () {
-	  // does nothing
-	};
-	
-	module.exports = {
-	  KickDrum: KickDrum
-	};
-
-
-/***/ },
-/* 12 */
-/***/ function(module, exports) {
-
-	module.exports = {
-	  kickDrum: {
-	    freq: 150
-	  }
-	};
-
-
-/***/ },
-/* 13 */
-/***/ function(module, exports, __webpack_require__) {
-
-	const KickDrum = __webpack_require__(11).KickDrum;
-	const BeatPatterns = __webpack_require__(14);
-	
-	function BeatMaker(options){
-	  this.tempo = options.tempo;
-	  this.pattern = BeatPatterns[options.pattern];
-	  this.emitNotes = options.emitNotes;
-	  this.setListenStatus = options.setListenStatus;
-	  this.drum = new KickDrum;
-	}
-	
-	BeatMaker.prototype.setup = function(parentEl){
-	  let startButton = document.createElement('button');
-	
-	  startButton.innerHTML = "start beat";
-	  startButton.addEventListener("click", function(event){
-	    event.preventDefault();
-	    this.start();
-	  }.bind(this));
-	  parentEl.appendChild(startButton);
-	
-	  let stopButton = document.createElement('button');
-	  stopButton.innerHTML = "stop beat";
-	  stopButton.addEventListener("click", function(event){
-	    event.preventDefault();
-	    this.stop();
-	  }.bind(this));
-	  parentEl.appendChild(stopButton);
-	};
-	
-	BeatMaker.prototype.manageBeat = function () {
-	  this.idx = this.idx || 0;
-	  if (this.pattern[this.idx]){
-	    this.drum.start();
-	    this.emitNotes();
-	  }
-	  this.idx = (this.idx === this.pattern.length - 1) ? 0 : this.idx + 1;
-	};
-	
-	
-	BeatMaker.prototype.start = function () {
-	  this.setListenStatus(true);
-	  let interval = (this.tempo / 60) / (this.pattern.length / 4) * 1000;
-	  this.currentBeat = setInterval(this.manageBeat.bind(this), interval);
-	};
-	
-	BeatMaker.prototype.stop = function () {
-	  this.setListenStatus(false);
-	  if (this.currentBeat) { clearInterval(this.currentBeat); }
-	};
-	
-	
-	module.exports = BeatMaker;
-
-
-/***/ },
-/* 14 */
-/***/ function(module, exports) {
-
-	module.exports = {
-	  FourBeat: [1,1,1,1],
-	  FourBeat2: [0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1]
-	};
-	// each array is one bar
-
-
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
-
-	const MusicTracker = __webpack_require__(5);
-	const Canvas = __webpack_require__(1);
-	
-	function GameUI(){
-	}
-	
-	GameUI.prototype.receiveNotes = function (notes) {
-	  this.canvas.receiveNotes(notes);
-	};
-	
-	GameUI.prototype.setupMusicTracker = function (musicEl, musicOptions) {
-	  this.musicTracker = new MusicTracker (
-	    musicOptions.keyboard,
-	    musicOptions.beatMaker,
-	    this.receiveNotes.bind(this)
-	  );
-	  this.musicTracker.setup(musicEl);
-	};
-	//
-	GameUI.prototype.setupCanvas = function (canvasEl, dims) {
-	  this.ctx = canvasEl.getContext('2d');
-	  this.canvas = new Canvas(this.ctx, dims);
-	};
-	
-	GameUI.prototype.setupCanvasGrid = function (triDim) {
-	  this.canvas.setupGrid(triDim);
-	};
-	
-	GameUI.prototype.animateCanvas = function() {
-	  this.canvas.animate();
-	};
-	
-	
-	module.exports = GameUI;
-	window.GameUI = GameUI;
-
-
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-	const ColorBlender = __webpack_require__(17);
+	const ColorBlender = __webpack_require__(9);
 	
 	function Triangle(pos){
 	  this.pos = pos;
@@ -787,7 +508,7 @@
 
 
 /***/ },
-/* 17 */
+/* 9 */
 /***/ function(module, exports) {
 
 	const ColorBlender = {
@@ -829,7 +550,7 @@
 
 
 /***/ },
-/* 18 */
+/* 10 */
 /***/ function(module, exports) {
 
 	const Dir = {
@@ -837,11 +558,11 @@
 	    up: [1,0],
 	    down: [1,0]
 	  },
-	  1: {
+	  4: {
 	    up: [1,0],
 	    down: [0,-1]
 	  },
-	  2: {
+	  1: {
 	    up: [-1,0],
 	    down: [0,-1]
 	  },
@@ -849,11 +570,11 @@
 	    up: [-1,0],
 	    down: [-1,0]
 	  },
-	  4: {
+	  5: {
 	    up: [0,1],
 	    down: [-1,0]
 	  },
-	  5: {
+	  2: {
 	    up: [0,1],
 	    down: [1,0]
 	  }
@@ -867,12 +588,309 @@
 	}
 	
 	ColorTile.prototype.newPos = function () {
-	  if (this.color === '#FFFFFF'){ this.pos = 0; return; }
+	  if (this.color === '#FFFFFF') { this.pos = 0; return; }
 	  const dir = ((this.pos[0] + this.pos[1]) % 2) ? 'down' : 'up';
+	  // const newX = this.pos[0] + this.path[dir][0];
+	  // const newY = this.pos[1] + this.path[dir][1]
 	  this.pos = [this.pos[0] + this.path[dir][0], this.pos[1] + this.path[dir][1]];
 	};
 	
 	module.exports = ColorTile;
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const Keyboard = __webpack_require__(12);
+	const BeatMaker = __webpack_require__(15);
+	
+	function MusicTracker (keyboardOptions, beatMakerOptions, passNotesToUI){
+	  this.passNotesToUI = passNotesToUI;
+	
+	  this.trackerStore = [];
+	  keyboardOptions.updateNotes = this.updateNotes.bind(this);
+	  this.keyboard = new Keyboard (keyboardOptions, this.trackerStore);
+	
+	  this.beatOn = false;
+	  beatMakerOptions.setListenStatus = this.setListenStatus.bind(this);
+	  beatMakerOptions.emitNotes = this.emitNotes.bind(this);
+	  beatMakerOptions.clearStore = this.clearStore.bind(this);
+	  this.beatMaker = new BeatMaker(beatMakerOptions);
+	}
+	
+	MusicTracker.prototype.setup = function (musicEl) {
+	  const keyboardEl = document.createElement('div');
+	  keyboardEl.style = 'keyboard-frame';
+	  this.keyboard.setup(keyboardEl);
+	  const beatMakerEl = document.createElement('div');
+	  beatMakerEl.style = 'beat-maker-frame';
+	  this.beatMaker.setup(beatMakerEl);
+	
+	  musicEl.appendChild(keyboardEl);
+	  musicEl.appendChild(beatMakerEl);
+	};
+	
+	MusicTracker.prototype.emitNotes = function(){
+	  this.passNotesToUI(this.trackerStore);
+	};
+	
+	MusicTracker.prototype.clearStore = function(){
+	  this.trackerStore = [];
+	}
+	
+	MusicTracker.prototype.setListenStatus = function (boolean) {
+	  this.beatOn = boolean;
+	};
+	
+	MusicTracker.prototype.updateNotes = function (note) {
+	  if (this.beatOn){
+	    if (this.trackerStore.length > 6 ){this.trackerStore.splice(0,1);}
+	    this.trackerStore.push(note);
+	  }
+	};
+	
+	module.exports = MusicTracker;
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const Note = __webpack_require__(5);
+	const Scales = __webpack_require__(4);
+	const Transpose = __webpack_require__(3);
+	const KickDrum = __webpack_require__(13).KickDrum;
+	
+	const keyMatch = ['KeyA','KeyS','KeyD','KeyF','KeyG','KeyH','KeyJ','KeyK','KeyL'];
+	
+	
+	function Keyboard(options){
+	  this.notes = Transpose.generateNotes(options.scale, options.root);
+	  this.keyMatch = keyMatch.slice(0, this.notes.length);
+	  this.updateNotes = options.updateNotes;
+	}
+	
+	Keyboard.prototype.showKeys = function () {
+	  this.notes.forEach(note => {
+	    console.log(note);
+	  });
+	};
+	
+	
+	Keyboard.prototype.setup = function (el) {
+	  const boardEl = document.createElement('div');
+	  boardEl.style = 'keyboard';
+	  this.notes.forEach((note, idx) => {
+	    let newKey = document.createElement('span');
+	    newKey.style = "key";
+	    newKey.innerHTML = note.name;
+	    boardEl.appendChild(newKey);
+	  });
+	
+	  document.addEventListener("keydown", this.keydown.bind(this));
+	
+	  document.addEventListener("keyup", this.keyup.bind(this));
+	
+	  el.appendChild(boardEl);
+	};
+	
+	
+	Keyboard.prototype.keydown = function(event) {
+	  event.preventDefault();
+	  let idx = this.keyMatch.indexOf(event.code);
+	  if (idx > -1) {
+	    if (this.notes[idx].start()){
+	      this.updateNotes(this.notes[idx].name);
+	    }
+	  }
+	};
+	
+	Keyboard.prototype.keyup = function(event){
+	  event.preventDefault();
+	  let idx = this.keyMatch.indexOf(event.code);
+	  if (idx > -1) {
+	    this.notes[idx].stop();
+	  }
+	};
+	
+	
+	
+	module.exports = Keyboard;
+	window.Keyboard = Keyboard;
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const DrumSounds = __webpack_require__(14);
+	const audioContext = __webpack_require__(7);
+	
+	function KickDrum (){
+	
+	}
+	
+	KickDrum.prototype.name = function(){
+	  return "Kick Drum";
+	};
+	
+	KickDrum.prototype.start = function() {
+	  this.osc = audioContext.createOscillator();
+	  this.gainNode = audioContext.createGain();
+	  this.osc.connect(this.gainNode);
+	  this.gainNode.connect(audioContext.destination);
+	
+	  const now = audioContext.currentTime;
+	
+	  this.osc.frequency.setValueAtTime(150, now);
+		this.gainNode.gain.setValueAtTime(2, now);
+	
+		this.osc.frequency.exponentialRampToValueAtTime(0.01, now + 0.5);
+		this.gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+		this.osc.start(now);
+	
+		this.osc.stop(now + 0.5);
+	};
+	
+	KickDrum.prototype.stop = function () {
+	  // does nothing
+	};
+	
+	module.exports = {
+	  KickDrum: KickDrum
+	};
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports) {
+
+	module.exports = {
+	  kickDrum: {
+	    freq: 150
+	  }
+	};
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const KickDrum = __webpack_require__(13).KickDrum;
+	const BeatPatterns = __webpack_require__(16);
+	
+	function BeatMaker(options){
+	  this.tempo = options.tempo;
+	  this.pattern = BeatPatterns[options.pattern];
+	  this.timeSig = options.timeSig || 4;
+	
+	  this.emitNotes = options.emitNotes;
+	  this.clearStore = options.clearStore;
+	  this.setListenStatus = options.setListenStatus;
+	  this.drum = new KickDrum;
+	}
+	
+	BeatMaker.prototype.setup = function(parentEl){
+	  let startButton = document.createElement('button');
+	
+	  startButton.innerHTML = "start beat";
+	  startButton.addEventListener("click", function(event){
+	    event.preventDefault();
+	    this.start();
+	  }.bind(this));
+	  parentEl.appendChild(startButton);
+	
+	  let stopButton = document.createElement('button');
+	  stopButton.innerHTML = "stop beat";
+	  stopButton.addEventListener("click", function(event){
+	    event.preventDefault();
+	    this.stop();
+	  }.bind(this));
+	  parentEl.appendChild(stopButton);
+	};
+	
+	BeatMaker.prototype.manageBeat = function () {
+	  this.idx = this.idx || 0;
+	  if (this.pattern[this.idx]){
+	    this.drum.start();
+	    this.emitNotes();
+	  }
+	  if (this.idx === this.pattern.length -1){
+	    this.idx = 0;
+	    this.clearStore();
+	  } else {
+	    this.idx++;
+	  }
+	  // this.idx = (this.idx === this.pattern.length - 1) ? 0 : this.idx + 1;
+	};
+	
+	
+	BeatMaker.prototype.start = function () {
+	  this.setListenStatus(true);
+	  let interval = (this.tempo / 60) / (this.pattern.length / this.timeSig) * 1000;
+	  this.currentBeat = setInterval(this.manageBeat.bind(this), interval);
+	};
+	
+	BeatMaker.prototype.stop = function () {
+	  this.setListenStatus(false);
+	  if (this.currentBeat) { clearInterval(this.currentBeat); }
+	};
+	
+	
+	module.exports = BeatMaker;
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
+
+	module.exports = {
+	  FourBeat: [1,1,1,1],
+	  FourBeat2: [0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1]
+	};
+	// each array is one bar
+
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const MusicTracker = __webpack_require__(11);
+	const Canvas = __webpack_require__(1);
+	
+	function GameUI(){
+	}
+	
+	GameUI.prototype.receiveNotes = function (notes) {
+	  this.canvas.receiveNotes(notes);
+	};
+	
+	GameUI.prototype.setupMusicTracker = function (musicEl, musicOptions) {
+	  this.musicTracker = new MusicTracker (
+	    musicOptions.keyboard,
+	    musicOptions.beatMaker,
+	    this.receiveNotes.bind(this)
+	  );
+	  this.musicTracker.setup(musicEl);
+	};
+	//
+	GameUI.prototype.setupCanvas = function (canvasEl, dims) {
+	  this.ctx = canvasEl.getContext('2d');
+	  this.canvas = new Canvas(this.ctx, dims);
+	};
+	
+	GameUI.prototype.setupCanvasGrid = function (triDim) {
+	  this.canvas.setupGrid(triDim);
+	};
+	
+	GameUI.prototype.animateCanvas = function() {
+	  this.canvas.animate();
+	};
+	
+	
+	module.exports = GameUI;
+	window.GameUI = GameUI;
 
 
 /***/ }

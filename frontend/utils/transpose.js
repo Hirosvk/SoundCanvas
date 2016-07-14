@@ -1,4 +1,7 @@
 const notes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
+const Scales = require('../constants/scales.js');
+const Note = require('../lib/note.js');
+
 module.exports = {
   interval(noteA, noteB){
     const _noteA = noteA.match(/([A-Gb]+)(\d)/);
@@ -25,6 +28,17 @@ module.exports = {
 
     const rIdx = notes.indexOf(rNote);
     return notes[(rIdx + interval)%12] + (parseInt(rNum) + Math.floor((rIdx + interval)/12)).toString();
+  },
 
+  generateNotes(scale, root){
+    let allNotes = [];
+    let totalInt = 0;
+    for (let i = 0; i < Scales[scale].length; i++){
+      totalInt += Scales[scale][i];
+      let newNoteName = this.getNote(root, totalInt);
+      allNotes.push(new Note(newNoteName));
+    }
+    return allNotes;
   }
+
 }

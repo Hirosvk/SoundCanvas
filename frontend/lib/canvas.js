@@ -3,8 +3,7 @@ const Transpose = require('../utils/transpose.js');
 const Triangle = require('./triangle.js');
 const ColorTile = require('./color_tile.js');
 
-let Pos = [[15,15],[15,15],[15,15],[15,15],[15,15],[15,15]];
-let DirCode = 0;
+let Pos = [[12,12],[9,9],[18,12],[9,15],[15,9],[6,12],[15,15]];
 
 function Canvas(ctx, dims){
   this.ctx = ctx;
@@ -31,10 +30,13 @@ Canvas.prototype.receiveNotes = function (notes) {
 
 Canvas.prototype.notesToTiles = function (notes){
   let colors = this.generateColors(notes);
-  colors.forEach( color => {
-    this.addColorTile(Pos[DirCode], color, DirCode);
-    if (DirCode === 5){ DirCode = 0; }
-    else { DirCode++; }
+  console.log(colors);
+  notes.forEach( (note, nIdx) => {
+    colors[note].forEach( (color, cIdx) => {
+      this.addColorTile(Pos[nIdx], color, cIdx);
+      // if (cIdx > 5) {debugger};
+      // max notes.length is 7, max colors.length is 6;
+    });
   });
 };
 
@@ -44,13 +46,17 @@ Canvas.prototype.addColorTile = function (pos, color, dirCode){
 };
 
 Canvas.prototype.generateColors = function (notes) {
-  let intervals = [];
-  for(let i = 0; i < notes.length -1; i++){
-    for(let j = i+1; j < notes.length; j++){
-      intervals.push(Transpose.interval(notes[i], notes[j]));
-    }
+  let colors = {};
+  // if (notes.length > 1) {debugger;}
+  for(let i = 0; i < notes.length; i++){
+    _notes = notes.slice();
+    _notes.splice(i, 1);
+    colors[notes[i]] = _notes.map( _note => {
+      return Colors[Transpose.interval(notes[i], _note)]
+    })
   }
-  return intervals.map(int => Colors[int]);
+  // if (notes.length > 2) {debugger}
+  return colors
 };
 
 

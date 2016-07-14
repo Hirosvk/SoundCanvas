@@ -4,7 +4,10 @@ const BeatPatterns = require('../constants/beat_patterns.js');
 function BeatMaker(options){
   this.tempo = options.tempo;
   this.pattern = BeatPatterns[options.pattern];
+  this.timeSig = options.timeSig || 4;
+
   this.emitNotes = options.emitNotes;
+  this.clearStore = options.clearStore;
   this.setListenStatus = options.setListenStatus;
   this.drum = new KickDrum;
 }
@@ -34,13 +37,19 @@ BeatMaker.prototype.manageBeat = function () {
     this.drum.start();
     this.emitNotes();
   }
-  this.idx = (this.idx === this.pattern.length - 1) ? 0 : this.idx + 1;
+  if (this.idx === this.pattern.length -1){
+    this.idx = 0;
+    this.clearStore();
+  } else {
+    this.idx++;
+  }
+  // this.idx = (this.idx === this.pattern.length - 1) ? 0 : this.idx + 1;
 };
 
 
 BeatMaker.prototype.start = function () {
   this.setListenStatus(true);
-  let interval = (this.tempo / 60) / (this.pattern.length / 4) * 1000;
+  let interval = (this.tempo / 60) / (this.pattern.length / this.timeSig) * 1000;
   this.currentBeat = setInterval(this.manageBeat.bind(this), interval);
 };
 

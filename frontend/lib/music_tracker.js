@@ -11,6 +11,7 @@ function MusicTracker (keyboardOptions, beatMakerOptions, passNotesToUI){
   this.beatOn = false;
   beatMakerOptions.setListenStatus = this.setListenStatus.bind(this);
   beatMakerOptions.emitNotes = this.emitNotes.bind(this);
+  beatMakerOptions.clearStore = this.clearStore.bind(this);
   this.beatMaker = new BeatMaker(beatMakerOptions);
 }
 
@@ -27,9 +28,7 @@ MusicTracker.prototype.setup = function (musicEl) {
 };
 
 MusicTracker.prototype.emitNotes = function(){
-  console.log(this.trackerStore);
   this.passNotesToUI(this.trackerStore);
-  this.clearStore();
 };
 
 MusicTracker.prototype.clearStore = function(){
@@ -42,6 +41,7 @@ MusicTracker.prototype.setListenStatus = function (boolean) {
 
 MusicTracker.prototype.updateNotes = function (note) {
   if (this.beatOn){
+    if (this.trackerStore.length > 6 ){this.trackerStore.splice(0,1);}
     this.trackerStore.push(note);
   }
 };

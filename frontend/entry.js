@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function(){
     },
     beatMaker: {
       tempo: 60,
-      pattern: "FourBeat2"
+      pattern: "FourBeat"
     }
   };
   gameUI.setupMusicTracker(musicFrame, musicOptions);

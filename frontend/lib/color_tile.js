@@ -3,11 +3,11 @@ const Dir = {
     up: [1,0],
     down: [1,0]
   },
-  1: {
+  4: {
     up: [1,0],
     down: [0,-1]
   },
-  2: {
+  1: {
     up: [-1,0],
     down: [0,-1]
   },
@@ -15,11 +15,11 @@ const Dir = {
     up: [-1,0],
     down: [-1,0]
   },
-  4: {
+  5: {
     up: [0,1],
     down: [-1,0]
   },
-  5: {
+  2: {
     up: [0,1],
     down: [1,0]
   }
@@ -33,8 +33,10 @@ function ColorTile(pos, color, dirCode){
 }
 
 ColorTile.prototype.newPos = function () {
-  if (this.color === '#FFFFFF'){ this.pos = 0; return; }
+  if (this.color === '#FFFFFF') { this.pos = 0; return; }
   const dir = ((this.pos[0] + this.pos[1]) % 2) ? 'down' : 'up';
+  // const newX = this.pos[0] + this.path[dir][0];
+  // const newY = this.pos[1] + this.path[dir][1]
   this.pos = [this.pos[0] + this.path[dir][0], this.pos[1] + this.path[dir][1]];
 };
 
