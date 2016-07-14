@@ -10,6 +10,8 @@ function Note (name){
   this.osc.connect(this.gainNode);
   this.gainNode.connect(audioContext.destination);
   this.osc.start(0);
+
+  this.playing = false;
 }
 
 Note.prototype.start = function(){
@@ -17,12 +19,18 @@ Note.prototype.start = function(){
   // when connecting/disconnecting to 'destination' to start/stop the note,
   // it made unplesant noise. Controlling gained worked better in terms of
   // sound quality.
-  this.gainNode.gain.value = 0.3;
+  if (!this.playing){
+    this.gainNode.gain.value = 0.3;
+    this.playing = true;
+    return true;
+  }
+  return false;
 };
 
 Note.prototype.stop = function(){
   // this.osc.disconnect(audioContext.destination);
   this.gainNode.gain.value = 0;
+  this.playing = false;
 };
 
 Note.prototype.frequency = function () {

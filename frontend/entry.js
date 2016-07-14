@@ -7,9 +7,11 @@ document.addEventListener("DOMContentLoaded", function(){
 
   const canvasEl = document.getElementById('canvas');
   gameUI.setupCanvas(canvasEl, [canvasEl.width, canvasEl.height]);
+  gameUI.setupCanvasGrid(50);
+  window.canvas = gameUI.canvas;
 
   const musicFrame = document.getElementById('music-tracker');
-  musicOptions = {
+  const musicOptions = {
     keyboard:  {
       scale: "major",
       root: "C4"
@@ -18,7 +20,9 @@ document.addEventListener("DOMContentLoaded", function(){
       tempo: 60,
       pattern: "FourBeat"
     }
-  }
+  };
   gameUI.setupMusicTracker(musicFrame, musicOptions);
+
+
 
 });

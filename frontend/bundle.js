@@ -44,7 +44,7 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const Canvas = __webpack_require__(1);
+	const Canvas = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"./lib/canvas.js\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
 	const MusicTracker = __webpack_require__(5);
 	const GameUI = __webpack_require__(15);
 	
@@ -53,9 +53,11 @@
 	
 	  const canvasEl = document.getElementById('canvas');
 	  gameUI.setupCanvas(canvasEl, [canvasEl.width, canvasEl.height]);
+	  gameUI.setupCanvasGrid(50);
+	  window.canvas = gameUI.canvas;
 	
 	  const musicFrame = document.getElementById('music-tracker');
-	  musicOptions = {
+	  const musicOptions = {
 	    keyboard:  {
 	      scale: "major",
 	      root: "C4"
@@ -64,117 +66,18 @@
 	      tempo: 60,
 	      pattern: "FourBeat"
 	    }
-	  }
+	  };
 	  gameUI.setupMusicTracker(musicFrame, musicOptions);
+	
+	
 	
 	});
 
 
 /***/ },
-/* 1 */
-/***/ function(module, exports, __webpack_require__) {
-
-	const Circle = __webpack_require__(2);
-	const Colors = __webpack_require__(3);
-	const Transpose = __webpack_require__(4);
-	// const options = {
-	//   pos: [100, 100],
-	//   vel: [1,1],
-	//   rad: 10,
-	//   color: 'red'
-	// }
-	
-	function Canvas(dims){
-	  this.dims = dims;
-	  this.elements = [];
-	}
-	
-	Canvas.prototype.receiveNotes = function (notes) {
-	  console.log(this.generateColors(notes));
-	};
-	
-	Canvas.prototype.generateColors = function (notes) {
-	  let intervals = [];
-	  for(let i = 0; i < notes.length -1; i++){
-	    for(let j = i+1; j < notes.length; j++){
-	      intervals.push(Transpose.interval(notes[i], notes[j]));
-	    }
-	  }
-	  return intervals.map(int => Colors[int]);
-	};
-	
-	Canvas.prototype.addCircle = function (options) {
-	  this.elements.push(new Circle (options));
-	};
-	
-	
-	Canvas.prototype.render = function (ctx) {
-	  ctx.clearRect(0, 0, this.dims[0], this.dims[1]);
-	  this.elements.forEach( circle => {
-	    circle.move();
-	    circle.draw(ctx);
-	  })
-	};
-	
-	Canvas.prototype.animate = function(ctx){
-	  setInterval(this.render.bind(this, ctx), 10);
-	}
-	
-	module.exports = Canvas;
-
-
-/***/ },
-/* 2 */
-/***/ function(module, exports) {
-
-	function Circle (options){
-	  this.pos = options.pos;
-	  this.vel = options.vel;
-	  this.rad = options.rad;
-	  this.color = options.color;
-	}
-	
-	Circle.prototype.move = function(){
-	  this.pos[0] = this.pos[0] + this.vel[0];
-	  this.pos[1] = this.pos[1] + this.vel[1];
-	}
-	
-	Circle.prototype.draw = function(ctx){
-	  ctx.beginPath();
-	  ctx.arc(this.pos[0], this.pos[1], this.rad, 0, Math.PI * 2);
-	  ctx.fillStyle = this.color;
-	  ctx.fill();
-	}
-	
-	
-	
-	
-	module.exports = Circle;
-
-
-/***/ },
-/* 3 */
-/***/ function(module, exports) {
-
-	module.exports = {
-	  0: '#000000',
-	  3: '#00FFFF',
-	  4: '#FFFF00',
-	  5: '#0000FF',
-	  7: '#FF0000',
-	  8: '#FF00FF',
-	  9: '#00FF00'
-	}
-	
-	// 0 	#ff0000 red
-	// 60 	#ffff00 yellow
-	// 120 #00ff00 green
-	// 180 #00ffff light blue
-	// 240 #0000FF blue
-	// 300 #ff00ff pink/purple
-
-
-/***/ },
+/* 1 */,
+/* 2 */,
+/* 3 */,
 /* 4 */
 /***/ function(module, exports) {
 
@@ -324,8 +227,9 @@
 	  event.preventDefault();
 	  let idx = this.keyMatch.indexOf(event.code);
 	  if (idx > -1) {
-	    this.notes[idx].start();
-	    this.updateNotes(this.notes[idx].name);
+	    if (this.notes[idx].start()){
+	      this.updateNotes(this.notes[idx].name);
+	    }
 	  }
 	};
 	
@@ -359,6 +263,8 @@
 	  this.osc.connect(this.gainNode);
 	  this.gainNode.connect(audioContext.destination);
 	  this.osc.start(0);
+	
+	  this.playing = false;
 	}
 	
 	Note.prototype.start = function(){
@@ -366,12 +272,18 @@
 	  // when connecting/disconnecting to 'destination' to start/stop the note,
 	  // it made unplesant noise. Controlling gained worked better in terms of
 	  // sound quality.
-	  this.gainNode.gain.value = 0.3;
+	  if (!this.playing){
+	    this.gainNode.gain.value = 0.3;
+	    this.playing = true;
+	    return true;
+	  }
+	  return false;
 	};
 	
 	Note.prototype.stop = function(){
 	  // this.osc.disconnect(audioContext.destination);
 	  this.gainNode.gain.value = 0;
+	  this.playing = false;
 	};
 	
 	Note.prototype.frequency = function () {
@@ -643,10 +555,10 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	const MusicTracker = __webpack_require__(5);
-	const Canvas = __webpack_require__(1);
+	const Canvas = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"./canvas.js\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
 	
 	function GameUI(){
-	};
+	}
 	
 	GameUI.prototype.receiveNotes = function (notes) {
 	  this.canvas.receiveNotes(notes);
@@ -663,12 +575,20 @@
 	//
 	GameUI.prototype.setupCanvas = function (canvasEl, dims) {
 	  this.ctx = canvasEl.getContext('2d');
-	  this.canvas = new Canvas(dims);
+	  this.canvas = new Canvas(this.ctx, dims);
+	};
+	
+	GameUI.prototype.setupCanvasGrid = function (triDim) {
+	  this.canvas.setupGrid(triDim);
+	};
+	
+	GameUI.prototype.showTriangle = function (pos){
+	  console.log(this.canvas.getTriangle(pos));
 	};
 	
 	
-	
 	module.exports = GameUI;
+	window.GameUI = GameUI;
 
 
 /***/ }

@@ -53,8 +53,9 @@ Keyboard.prototype.keydown = function(event) {
   event.preventDefault();
   let idx = this.keyMatch.indexOf(event.code);
   if (idx > -1) {
-    this.notes[idx].start();
-    this.updateNotes(this.notes[idx].name);
+    if (this.notes[idx].start()){
+      this.updateNotes(this.notes[idx].name);
+    }
   }
 };
 
