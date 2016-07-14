@@ -7,7 +7,6 @@ document.addEventListener("DOMContentLoaded", function(){
 
   const canvasEl = document.getElementById('canvas');
   gameUI.setupCanvas(canvasEl, [canvasEl.width, canvasEl.height]);
-  gameUI.setupCanvasGrid(30);
 
   const musicFrame = document.getElementById('music-tracker');
   const musicOptions = {
@@ -16,12 +15,15 @@ document.addEventListener("DOMContentLoaded", function(){
       root: "C4"
     },
     beatMaker: {
-      tempo: 60,
-      pattern: "FourBeat"
+      tempo: 120,
+      pattern: "FourBeat2",
+      timeSig: 4
     }
   };
   gameUI.setupMusicTracker(musicFrame, musicOptions);
+  gameUI.setupButtons(document.getElementById('dashboard'));
 
-  gameUI.animateCanvas();
+  window.gameUI = gameUI;
+  window.canvas = gameUI.canvas;
 
 });

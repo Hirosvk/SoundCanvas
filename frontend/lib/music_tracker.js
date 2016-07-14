@@ -5,26 +5,31 @@ function MusicTracker (keyboardOptions, beatMakerOptions, passNotesToUI){
   this.passNotesToUI = passNotesToUI;
 
   this.trackerStore = [];
+  this.beatOn = false;
+  this.reset(keyboardOptions, beatMakerOptions)
+}
+
+MusicTracker.prototype.reset = function(keyboardOptions, beatMakerOptions){
   keyboardOptions.updateNotes = this.updateNotes.bind(this);
   this.keyboard = new Keyboard (keyboardOptions, this.trackerStore);
 
-  this.beatOn = false;
   beatMakerOptions.setListenStatus = this.setListenStatus.bind(this);
   beatMakerOptions.emitNotes = this.emitNotes.bind(this);
   beatMakerOptions.clearStore = this.clearStore.bind(this);
   this.beatMaker = new BeatMaker(beatMakerOptions);
-}
 
-MusicTracker.prototype.setup = function (musicEl) {
-  const keyboardEl = document.createElement('div');
-  keyboardEl.style = 'keyboard-frame';
-  this.keyboard.setup(keyboardEl);
-  const beatMakerEl = document.createElement('div');
-  beatMakerEl.style = 'beat-maker-frame';
-  this.beatMaker.setup(beatMakerEl);
+  this.trackOptions = {
+    tempo: beatMakerOptions.tempo,
+    timeSig: beatMakerOptions.timeSig
+  }
+  if (this.track){
+    this.loadTrack(this.track, this.trackOptions);
+  }
 
-  musicEl.appendChild(keyboardEl);
-  musicEl.appendChild(beatMakerEl);
+};
+
+MusicTracker.prototype.setupKeys = function (keyboardEl) {
+  this.keyboard.setupKeys(keyboardEl);
 };
 
 MusicTracker.prototype.emitNotes = function(){
@@ -45,5 +50,26 @@ MusicTracker.prototype.updateNotes = function (note) {
     this.trackerStore.push(note);
   }
 };
+
+MusicTracker.prototype.loadTrack = function (track) {
+  this.track = track;
+  this.keyboard.loadTrack(track, this.trackOptions);
+};
+
+MusicTracker.prototype.unloadTrack = function () {
+  this.track = undefined;
+  this.trackOptions = undefined;
+  this.keyboard.unloadTrack();
+};
+
+MusicTracker.prototype.start = function () {
+  this.keyboard.playTrack();
+  this.beatMaker.start();
+};
+
+MusicTracker.prototype.stop = function(){
+  this.beatMaker.stop();
+  this.keyboard.stopTrack();
+}
 
 module.exports = MusicTracker;

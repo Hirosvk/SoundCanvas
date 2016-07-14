@@ -4,7 +4,7 @@ const BeatPatterns = require('../constants/beat_patterns.js');
 function BeatMaker(options){
   this.tempo = options.tempo;
   this.pattern = BeatPatterns[options.pattern];
-  this.timeSig = options.timeSig || 4;
+  this.timeSig = options.timeSig;
 
   this.emitNotes = options.emitNotes;
   this.clearStore = options.clearStore;
@@ -12,44 +12,32 @@ function BeatMaker(options){
   this.drum = new KickDrum;
 }
 
-BeatMaker.prototype.setup = function(parentEl){
-  let startButton = document.createElement('button');
-
-  startButton.innerHTML = "start beat";
-  startButton.addEventListener("click", function(event){
-    event.preventDefault();
-    this.start();
-  }.bind(this));
-  parentEl.appendChild(startButton);
-
-  let stopButton = document.createElement('button');
-  stopButton.innerHTML = "stop beat";
-  stopButton.addEventListener("click", function(event){
-    event.preventDefault();
-    this.stop();
-  }.bind(this));
-  parentEl.appendChild(stopButton);
-};
-
 BeatMaker.prototype.manageBeat = function () {
-  this.idx = this.idx || 0;
-  if (this.pattern[this.idx]){
+  this.barIdx = this.barIdx || 0;
+  this.beatIdx = this.beatIdx || 0;
+  if (this.pattern[this.barIdx][this.beatIdx]){
     this.drum.start();
     this.emitNotes();
   }
-  if (this.idx === this.pattern.length -1){
-    this.idx = 0;
+  // update indices below
+  if (this.beatIdx === this.pattern[0].length - 1){
+    this.beatIdx = 0;
     this.clearStore();
+    if (this.barIdx === this.pattern.length - 1){
+      this.barIdx = 0;
+    } else {
+      this.barIdx++;
+    }
   } else {
-    this.idx++;
+    this.beatIdx++;
   }
-  // this.idx = (this.idx === this.pattern.length - 1) ? 0 : this.idx + 1;
 };
 
 
 BeatMaker.prototype.start = function () {
   this.setListenStatus(true);
-  let interval = (this.tempo / 60) / (this.pattern.length / this.timeSig) * 1000;
+  let interval = 1000 / (this.pattern[0].length / this.timeSig) * (60/this.tempo);
+  console.log(interval);
   this.currentBeat = setInterval(this.manageBeat.bind(this), interval);
 };
 

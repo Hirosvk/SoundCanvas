@@ -53,7 +53,6 @@
 	
 	  const canvasEl = document.getElementById('canvas');
 	  gameUI.setupCanvas(canvasEl, [canvasEl.width, canvasEl.height]);
-	  gameUI.setupCanvasGrid(30);
 	
 	  const musicFrame = document.getElementById('music-tracker');
 	  const musicOptions = {
@@ -62,13 +61,16 @@
 	      root: "C4"
 	    },
 	    beatMaker: {
-	      tempo: 60,
-	      pattern: "FourBeat"
+	      tempo: 120,
+	      pattern: "FourBeat2",
+	      timeSig: 4
 	    }
 	  };
 	  gameUI.setupMusicTracker(musicFrame, musicOptions);
+	  gameUI.setupButtons(document.getElementById('dashboard'));
 	
-	  gameUI.animateCanvas();
+	  window.gameUI = gameUI;
+	  window.canvas = gameUI.canvas;
 	
 	});
 
@@ -82,22 +84,26 @@
 	const Triangle = __webpack_require__(8);
 	const ColorTile = __webpack_require__(10);
 	
-	let Pos = [[12,12],[9,9],[18,12],[9,15],[15,9],[6,12],[15,15]];
+	let Center = [7,7];
+	const Pos = [[-3,-3],[6,0],[-3,3],[3,-3],[-6,0],[3,3],[0,0]];
+	const Dir = [[0,0],[-2, 0],[0,1],[-2, 1],[-1,0],[-1,1]];
 	
 	function Canvas(ctx, dims){
 	  this.ctx = ctx;
 	  this.dims = dims;
+	  this.opX = this.add;
+	  this.opY = this.add;
 	}
 	
 	Canvas.prototype.setupGrid = function (triDim) {
 	  this.grid = {};
 	  this.triDim = triDim;
 	  this.cosDim = Math.floor(triDim * 0.866);
-	  this.rowLength = Math.floor(this.dims[0]/this.triDim) * 2;
-	  this.colLength = Math.floor(this.dims[1]/this.cosDim);
+	  this.xSize = Math.floor(this.dims[0]/this.triDim) * 2;
+	  this.ySize = Math.floor(this.dims[1]/this.cosDim);
 	
-	  for (let y = 0; y <= this.colLength; y++){
-	    for(let x = 0; x <= this.rowLength + 1; x++){
+	  for (let y = 0; y <= this.ySize; y++){
+	    for(let x = 0; x <= this.xSize + 1; x++){
 	      this.grid[[x,y]] = new Triangle([x,y]);
 	    }
 	  }
@@ -109,24 +115,50 @@
 	
 	Canvas.prototype.notesToTiles = function (notes){
 	  let colors = this.generateColors(notes);
-	  console.log(colors);
 	  notes.forEach( (note, nIdx) => {
 	    colors[note].forEach( (color, cIdx) => {
-	      this.addColorTile(Pos[nIdx], color, cIdx);
-	      // if (cIdx > 5) {debugger};
+	      let newX = Center[0] + Pos[nIdx][0] + Dir[cIdx][0];
+	      let newY = Center[1] + Pos[nIdx][1] + Dir[cIdx][1];
+	      this.addColorTile([newX, newY], color, cIdx);
 	      // max notes.length is 7, max colors.length is 6;
 	    });
 	  });
+	  this.moveCenter(Math.floor(notes.length/2));
+	};
+	
+	Canvas.prototype.moveCenter = function(diff){
+	  let newX = this.opX(Center[0], diff);
+	  if (newX > this.xSize - 7){
+	    this.opX = this.sub;
+	  } else if (newX < 7){
+	    this.opX = this.add;
+	  }
+	  let newY = this.opY(Center[1], diff);
+	  if (newY > this.ySize - 7){
+	    this.opY = this.sub;
+	  } else if (newY < 7){
+	    this.opY = this.add;
+	  }
+	  Center = [newX, newY];
+	};
+	
+	Canvas.prototype.add = function(n1, n2){
+	  return n1 + n2;
+	};
+	
+	Canvas.prototype.sub = function (n1, n2) {
+	  return n1 - n2;
 	};
 	
 	Canvas.prototype.addColorTile = function (pos, color, dirCode){
 	  let tile = new ColorTile(pos, color, dirCode);
-	  this.grid[pos].receiveColorTile(tile);
+	  if (this.grid[pos]){
+	    this.grid[pos].receiveColorTile(tile);
+	  }
 	};
 	
 	Canvas.prototype.generateColors = function (notes) {
 	  let colors = {};
-	  // if (notes.length > 1) {debugger;}
 	  for(let i = 0; i < notes.length; i++){
 	    _notes = notes.slice();
 	    _notes.splice(i, 1);
@@ -134,7 +166,6 @@
 	      return Colors[Transpose.interval(notes[i], _note)]
 	    })
 	  }
-	  // if (notes.length > 2) {debugger}
 	  return colors
 	};
 	
@@ -144,25 +175,25 @@
 	  let anchor = [0,0];
 	  let _x = 0;
 	
-	  for (let y = 0; y <= this.colLength; y++){
-	    for(let x = 0; x <= this.rowLength + 1; x++){
-	      let row = [];
-	      if (x % 2 === 1){
-	        this.ctx.beginPath();
-	        this.ctx.moveTo(anchor[0], anchor[1]);
-	        this.ctx.lineTo(anchor[0] + Math.floor(this.triDim/2), anchor[1] + this.cosDim);
-	        this.ctx.lineTo(anchor[0] + this.triDim, anchor[1]);
-	      } else {
-	        this.ctx.beginPath();
-	        this.ctx.moveTo(anchor[0], anchor[1]);
-	        this.ctx.lineTo(anchor[0] - Math.floor(this.triDim/2), anchor[1] + this.cosDim);
-	        this.ctx.lineTo(anchor[0] + Math.floor(this.triDim/2), anchor[1] + this.cosDim);
-	      }
+	  for (let y = 0; y <= this.ySize; y++){
+	    for(let x = 0; x <= this.xSize + 1; x++){
 	      if (this.grid[[x+_x, y]]) {
-	        this.ctx.fillStyle = this.grid[[x+_x, y]].getColor();
-	        this.ctx.fill();
-	      } else {
-	        this.ctx.closePath();
+	        let color = this.grid[[x+_x, y]].getColor();
+	        if (color !== '#FFFFFF') {
+	          if (x % 2 === 1){
+	            this.ctx.beginPath();
+	            this.ctx.moveTo(anchor[0], anchor[1]);
+	            this.ctx.lineTo(anchor[0] + Math.floor(this.triDim/2), anchor[1] + this.cosDim);
+	            this.ctx.lineTo(anchor[0] + this.triDim, anchor[1]);
+	          } else {
+	            this.ctx.beginPath();
+	            this.ctx.moveTo(anchor[0], anchor[1]);
+	            this.ctx.lineTo(anchor[0] - Math.floor(this.triDim/2), anchor[1] + this.cosDim);
+	            this.ctx.lineTo(anchor[0] + Math.floor(this.triDim/2), anchor[1] + this.cosDim);
+	          }
+	          this.ctx.fillStyle = color;
+	          this.ctx.fill();
+	        }
 	      }
 	      anchor[0] += (this.triDim * (x % 2));
 	    }
@@ -181,8 +212,8 @@
 	
 	Canvas.prototype.moveColorTiles = function () {
 	  let leavingTiles = [];
-	  for (let y = 0; y <= this.colLength; y++){
-	    for(let x = 0; x <= this.rowLength + 1; x++){
+	  for (let y = 0; y <= this.ySize; y++){
+	    for(let x = 0; x <= this.xSize + 1; x++){
 	      leavingTiles = leavingTiles.concat(this.grid[[x,y]].emitColorTiles());
 	    }
 	  }
@@ -204,6 +235,10 @@
 	
 	Canvas.prototype.stopAnimation = function(){
 	  clearInterval(this.animation);
+	};
+	
+	Canvas.prototype.clearCanvas = function(){
+	  this.ctx.clearRect(0,0,this.dims[0],this.dims[1])
 	};
 	
 	module.exports = Canvas;
@@ -609,26 +644,31 @@
 	  this.passNotesToUI = passNotesToUI;
 	
 	  this.trackerStore = [];
+	  this.beatOn = false;
+	  this.reset(keyboardOptions, beatMakerOptions)
+	}
+	
+	MusicTracker.prototype.reset = function(keyboardOptions, beatMakerOptions){
 	  keyboardOptions.updateNotes = this.updateNotes.bind(this);
 	  this.keyboard = new Keyboard (keyboardOptions, this.trackerStore);
 	
-	  this.beatOn = false;
 	  beatMakerOptions.setListenStatus = this.setListenStatus.bind(this);
 	  beatMakerOptions.emitNotes = this.emitNotes.bind(this);
 	  beatMakerOptions.clearStore = this.clearStore.bind(this);
 	  this.beatMaker = new BeatMaker(beatMakerOptions);
-	}
 	
-	MusicTracker.prototype.setup = function (musicEl) {
-	  const keyboardEl = document.createElement('div');
-	  keyboardEl.style = 'keyboard-frame';
-	  this.keyboard.setup(keyboardEl);
-	  const beatMakerEl = document.createElement('div');
-	  beatMakerEl.style = 'beat-maker-frame';
-	  this.beatMaker.setup(beatMakerEl);
+	  this.trackOptions = {
+	    tempo: beatMakerOptions.tempo,
+	    timeSig: beatMakerOptions.timeSig
+	  }
+	  if (this.track){
+	    this.loadTrack(this.track, this.trackOptions);
+	  }
 	
-	  musicEl.appendChild(keyboardEl);
-	  musicEl.appendChild(beatMakerEl);
+	};
+	
+	MusicTracker.prototype.setupKeys = function (keyboardEl) {
+	  this.keyboard.setupKeys(keyboardEl);
 	};
 	
 	MusicTracker.prototype.emitNotes = function(){
@@ -650,6 +690,27 @@
 	  }
 	};
 	
+	MusicTracker.prototype.loadTrack = function (track) {
+	  this.track = track;
+	  this.keyboard.loadTrack(track, this.trackOptions);
+	};
+	
+	MusicTracker.prototype.unloadTrack = function () {
+	  this.track = undefined;
+	  this.trackOptions = undefined;
+	  this.keyboard.unloadTrack();
+	};
+	
+	MusicTracker.prototype.start = function () {
+	  this.keyboard.playTrack();
+	  this.beatMaker.start();
+	};
+	
+	MusicTracker.prototype.stop = function(){
+	  this.beatMaker.stop();
+	  this.keyboard.stopTrack();
+	}
+	
 	module.exports = MusicTracker;
 
 
@@ -665,11 +726,24 @@
 	const keyMatch = ['KeyA','KeyS','KeyD','KeyF','KeyG','KeyH','KeyJ','KeyK','KeyL'];
 	
 	
-	function Keyboard(options){
+	function Keyboard(options, track, trackOptions){
 	  this.notes = Transpose.generateNotes(options.scale, options.root);
 	  this.keyMatch = keyMatch.slice(0, this.notes.length);
 	  this.updateNotes = options.updateNotes;
 	}
+	
+	Keyboard.prototype.loadTrack = function (track, trackOptions){
+	  this.track = track;
+	  this.trackOptions = {
+	    tempo: trackOptions.tempo,
+	    timeSig: trackOptions.timeSig
+	  };
+	};
+	
+	Keyboard.prototype.unloadTrack = function () {
+	  this.track = undefined;
+	  this.trackOptions = undefined;
+	};
 	
 	Keyboard.prototype.showKeys = function () {
 	  this.notes.forEach(note => {
@@ -678,13 +752,17 @@
 	};
 	
 	
-	Keyboard.prototype.setup = function (el) {
+	Keyboard.prototype.setupKeys = function (keyboardEl) {
 	  const boardEl = document.createElement('div');
 	  boardEl.style = 'keyboard';
 	  this.notes.forEach((note, idx) => {
 	    let newKey = document.createElement('span');
 	    newKey.style = "key";
-	    newKey.innerHTML = note.name;
+	    newKey.innerHTML = `${note.name} : ${this.keyMatch[idx]}`;
+	    newKey.id = idx
+	    newKey.addEventListener("mousedown", this.pressKey.bind(this));
+	    newKey.addEventListener("mouseup", this.releaseKey.bind(this));
+	    newKey.addEventListener("mouseout", this.releaseKey.bind(this));
 	    boardEl.appendChild(newKey);
 	  });
 	
@@ -692,13 +770,26 @@
 	
 	  document.addEventListener("keyup", this.keyup.bind(this));
 	
-	  el.appendChild(boardEl);
+	  keyboardEl.appendChild(boardEl);
 	};
 	
+	Keyboard.prototype.pressKey = function (event){
+	  this.keydown(parseInt(event.target.id));
+	};
+	
+	Keyboard.prototype.releaseKey = function (event) {
+	  this.keyup(parseInt(event.target.id));
+	};
 	
 	Keyboard.prototype.keydown = function(event) {
-	  event.preventDefault();
-	  let idx = this.keyMatch.indexOf(event.code);
+	  let idx;
+	  if (typeof event === 'number') {
+	    idx = event;
+	  } else {
+	    event.preventDefault();
+	    idx = this.keyMatch.indexOf(event.code);
+	  }
+	
 	  if (idx > -1) {
 	    if (this.notes[idx].start()){
 	      this.updateNotes(this.notes[idx].name);
@@ -707,13 +798,64 @@
 	};
 	
 	Keyboard.prototype.keyup = function(event){
-	  event.preventDefault();
-	  let idx = this.keyMatch.indexOf(event.code);
+	  let idx;
+	  if (typeof event === 'number') {
+	    idx = event;
+	  } else {
+	    event.preventDefault();
+	    idx = this.keyMatch.indexOf(event.code);
+	  }
 	  if (idx > -1) {
 	    this.notes[idx].stop();
 	  }
 	};
 	
+	
+	Keyboard.prototype.managePlayback = function(){
+	  this.barIdx = this.barIdx || 0;
+	  this.noteIdx = this.noteIdx || 0;
+	  this.keyMatch.forEach( (key, idx) => {
+	    if (this.track[idx]){
+	      let note = this.track[idx][this.barIdx][this.noteIdx];
+	      if (note) {
+	        this.keydown(idx);
+	      } else {
+	        this.keyup(idx);
+	      }
+	    }
+	  })
+	  // update indices below
+	  if (this.noteIdx === this.track.noteLength - 1){
+	    this.noteIdx = 0;
+	    if (this.barIdx === this.track.barLength - 1){
+	      this.barIdx = 0;
+	    } else {
+	      this.barIdx++;
+	    }
+	  } else {
+	    this.noteIdx++;
+	  }
+	};
+	
+	Keyboard.prototype.playTrack = function(){
+	  if (this.track){
+	    let interval = 1000 /
+	        (this.track.noteLength / this.trackOptions.timeSig) *
+	        (60/this.trackOptions.tempo);
+	    this.currentTrack = setInterval(this.managePlayback.bind(this), interval);
+	  }
+	};
+	
+	Keyboard.prototype.stopTrack = function () {
+	  clearInterval(this.currentTrack);
+	  this.clearNotes();
+	};
+	
+	Keyboard.prototype.clearNotes = function () {
+	  this.keyMatch.forEach((key, idx) => {
+	    this.notes[idx].stop();
+	  })
+	};
 	
 	
 	module.exports = Keyboard;
@@ -783,7 +925,7 @@
 	function BeatMaker(options){
 	  this.tempo = options.tempo;
 	  this.pattern = BeatPatterns[options.pattern];
-	  this.timeSig = options.timeSig || 4;
+	  this.timeSig = options.timeSig;
 	
 	  this.emitNotes = options.emitNotes;
 	  this.clearStore = options.clearStore;
@@ -791,44 +933,32 @@
 	  this.drum = new KickDrum;
 	}
 	
-	BeatMaker.prototype.setup = function(parentEl){
-	  let startButton = document.createElement('button');
-	
-	  startButton.innerHTML = "start beat";
-	  startButton.addEventListener("click", function(event){
-	    event.preventDefault();
-	    this.start();
-	  }.bind(this));
-	  parentEl.appendChild(startButton);
-	
-	  let stopButton = document.createElement('button');
-	  stopButton.innerHTML = "stop beat";
-	  stopButton.addEventListener("click", function(event){
-	    event.preventDefault();
-	    this.stop();
-	  }.bind(this));
-	  parentEl.appendChild(stopButton);
-	};
-	
 	BeatMaker.prototype.manageBeat = function () {
-	  this.idx = this.idx || 0;
-	  if (this.pattern[this.idx]){
+	  this.barIdx = this.barIdx || 0;
+	  this.beatIdx = this.beatIdx || 0;
+	  if (this.pattern[this.barIdx][this.beatIdx]){
 	    this.drum.start();
 	    this.emitNotes();
 	  }
-	  if (this.idx === this.pattern.length -1){
-	    this.idx = 0;
+	  // update indices below
+	  if (this.beatIdx === this.pattern[0].length - 1){
+	    this.beatIdx = 0;
 	    this.clearStore();
+	    if (this.barIdx === this.pattern.length - 1){
+	      this.barIdx = 0;
+	    } else {
+	      this.barIdx++;
+	    }
 	  } else {
-	    this.idx++;
+	    this.beatIdx++;
 	  }
-	  // this.idx = (this.idx === this.pattern.length - 1) ? 0 : this.idx + 1;
 	};
 	
 	
 	BeatMaker.prototype.start = function () {
 	  this.setListenStatus(true);
-	  let interval = (this.tempo / 60) / (this.pattern.length / this.timeSig) * 1000;
+	  let interval = 1000 / (this.pattern[0].length / this.timeSig) * (60/this.tempo);
+	  console.log(interval);
 	  this.currentBeat = setInterval(this.manageBeat.bind(this), interval);
 	};
 	
@@ -846,8 +976,8 @@
 /***/ function(module, exports) {
 
 	module.exports = {
-	  FourBeat: [1,1,1,1],
-	  FourBeat2: [0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1]
+	  FourBeat: [[1,1,1,1]],
+	  FourBeat2: [[0,0,1,1,0,1,0,1],[0,0,1,1,0,1,1,1]]
 	};
 	// each array is one bar
 
@@ -858,6 +988,7 @@
 
 	const MusicTracker = __webpack_require__(11);
 	const Canvas = __webpack_require__(1);
+	const Tracks = __webpack_require__(18);
 	
 	function GameUI(){
 	}
@@ -866,31 +997,107 @@
 	  this.canvas.receiveNotes(notes);
 	};
 	
-	GameUI.prototype.setupMusicTracker = function (musicEl, musicOptions) {
+	GameUI.prototype.setupMusicTracker = function (keyboardEl, musicOptions) {
 	  this.musicTracker = new MusicTracker (
 	    musicOptions.keyboard,
 	    musicOptions.beatMaker,
 	    this.receiveNotes.bind(this)
 	  );
-	  this.musicTracker.setup(musicEl);
+	  this.musicTracker.setupKeys(keyboardEl);
 	};
 	//
 	GameUI.prototype.setupCanvas = function (canvasEl, dims) {
 	  this.ctx = canvasEl.getContext('2d');
 	  this.canvas = new Canvas(this.ctx, dims);
+	  this.canvas.setupGrid(30);
 	};
 	
-	GameUI.prototype.setupCanvasGrid = function (triDim) {
-	  this.canvas.setupGrid(triDim);
+	
+	GameUI.prototype.setupButtons = function (dashboardEl) {
+	  let startButton = document.createElement('button');
+	
+	  startButton.innerHTML = "start";
+	  startButton.addEventListener("click", function(event){
+	    event.preventDefault();
+	    this.start();
+	  }.bind(this));
+	  dashboardEl.appendChild(startButton);
+	
+	  let stopButton = document.createElement('button');
+	  stopButton.innerHTML = "stop";
+	  stopButton.addEventListener("click", function(event){
+	    event.preventDefault();
+	    this.stop();
+	  }.bind(this));
+	  dashboardEl.appendChild(stopButton);
 	};
 	
-	GameUI.prototype.animateCanvas = function() {
+	
+	GameUI.prototype.start = function() {
 	  this.canvas.animate();
+	  this.musicTracker.start();
 	};
 	
+	GameUI.prototype.stop = function () {
+	  this.canvas.stopAnimation();
+	  this.musicTracker.stop();
+	};
+	
+	GameUI.prototype.loadTrack = function (track){
+	  this.musicTracker.loadTrack(track);
+	};
+	
+	GameUI.prototype.unloadTrack = function () {
+	  this.musicTracker.unloadTrack();
+	};
+	
+	GameUI.prototype.clearCanvas = function () {
+	  this.canvas.clearCanvas();
+	};
 	
 	module.exports = GameUI;
 	window.GameUI = GameUI;
+
+
+/***/ },
+/* 18 */
+/***/ function(module, exports) {
+
+	const WhenTheSaintGoMarchingIn = {
+	  0: [
+	    [0,1,0,0],[0,0,0,0]
+	  ],
+	  1: [
+	    [0,0,0,0],[0,0,0,0]
+	  ],
+	  2: [
+	    [0,0,1,0],[0,0,0,0]
+	  ],
+	  3: [
+	    [0,0,0,1],[0,0,0,0]
+	  ],
+	  4: [
+	    [0,0,0,0],[1,0,0,0]
+	  ],
+	  5: [
+	    [0,0,0,0],[0,0,0,0]
+	  ],
+	  6: [
+	    [0,0,0,0],[0,0,0,0]
+	  ],
+	  barLength: 2,
+	  noteLength: 4
+	}
+	
+	module.exports = {
+	  WhenTheSaintGoMarchingIn: WhenTheSaintGoMarchingIn
+	}
+	
+	window.WhenTheSaintGoMarchingIn = WhenTheSaintGoMarchingIn
+	window.options = {
+	  tempo: 60,
+	  timeSig: 4
+	}
 
 
 /***/ }
