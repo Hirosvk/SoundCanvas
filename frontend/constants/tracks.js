@@ -21,7 +21,11 @@ const WhenTheSaintGoMarchingIn = {
     [0,0,0,0],[0,0,0,0]
   ],
   barLength: 2,
-  noteLength: 4
+  noteLength: 4,
+  scale: "major",
+  timeSig: 4,
+  pattern: "FourBeat",
+  tempo: 160
 }
 
 module.exports = {

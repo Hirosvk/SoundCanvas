@@ -10,14 +10,13 @@ function MusicTracker (options, passNotesToUI, keyboardEl){
   this.reset(options);
 }
 
-MusicTracker.prototype.reset = function(options){
+MusicTracker.prototype.reset = function(options, track){
   keyboardOptions = {
     updateNotes: this.updateNotes.bind(this),
     scale: options.scale,
-    root: options.root
+    root: options.root,
+    tempo: options.tempo
   }
-  this.keyboard = new Keyboard (keyboardOptions, this.trackerStore);
-
   beatMakerOptions = {
     setListenStatus: this.setListenStatus.bind(this),
     emitNotes: this.emitNotes.bind(this),
@@ -26,22 +25,16 @@ MusicTracker.prototype.reset = function(options){
     timeSig: options.timeSig,
     pattern: options.pattern
   }
+
+  this.keyboard = new Keyboard (
+    this.keyboardEl,
+    keyboardOptions,
+    track
+  );
+
   this.beatMaker = new BeatMaker(beatMakerOptions);
-
-  this.trackOptions = {
-    tempo: options.tempo,
-    timeSig: options.timeSig
-  }
-  if (this.track){
-    this.loadTrack(this.track, this.trackOptions);
-  }
-
-  this.setupKeys(this.keyboardEl);
 };
 
-MusicTracker.prototype.setupKeys = function (keyboardEl) {
-  this.keyboard.setupKeys(keyboardEl);
-};
 
 MusicTracker.prototype.emitNotes = function(){
   this.passNotesToUI(this.trackerStore);
@@ -62,16 +55,16 @@ MusicTracker.prototype.updateNotes = function (note) {
   }
 };
 
-MusicTracker.prototype.loadTrack = function (track) {
-  this.track = track;
-  this.keyboard.loadTrack(track, this.trackOptions);
-};
-
-MusicTracker.prototype.unloadTrack = function () {
-  this.track = undefined;
-  this.trackOptions = undefined;
-  this.keyboard.unloadTrack();
-};
+// MusicTracker.prototype.loadTrack = function (track) {
+//   this.track = track;
+//   this.keyboard.loadTrack(track, this.trackOptions);
+// };
+//
+// MusicTracker.prototype.unloadTrack = function () {
+//   this.track = undefined;
+//   this.trackOptions = undefined;
+//   this.keyboard.unloadTrack();
+// };
 
 MusicTracker.prototype.start = function () {
   this.keyboard.playTrack();
@@ -79,8 +72,8 @@ MusicTracker.prototype.start = function () {
 };
 
 MusicTracker.prototype.stop = function(){
-  this.beatMaker.stop();
   this.keyboard.stopTrack();
+  this.beatMaker.stop();
 }
 
 MusicTracker.prototype.resetKeyboard = function () {

@@ -37,21 +37,22 @@ GameUI.prototype.setupCanvas = function (canvasEl, dims) {
 
 GameUI.prototype.setupSelects = function (optionEl) {
   scaleOptions = ["major",'minor']
-  optionEl.appendChild(this.selectMaker("scale", scaleOptions));
-  tempoOptions = [140,120, 100, 80, 60, 40];
-  optionEl.appendChild(this.selectMaker("tempo", tempoOptions));
+  optionEl.appendChild(this.selectMaker("scale", "Scale", scaleOptions));
+  tempoOptions = [160, 140, 120, 100, 80, 60, 40];
+  optionEl.appendChild(this.selectMaker("tempo", "Tempo", tempoOptions));
   patternOptions = ['FourBeat', 'FourBeat2'];
-  optionEl.appendChild(this.selectMaker("pattern", patternOptions));
+  optionEl.appendChild(this.selectMaker("pattern", "Beat Pattern", patternOptions));
+//   timeSigOptions = [4, 3, 2];
+//   optionEl.appendChild(this.selectMaker("timeSig", "Time Signature", timeSigOptions));
 };
 
-GameUI.prototype.selectMaker = function (id, options) {
+GameUI.prototype.selectMaker = function (id, labelText, options) {
   let select = document.createElement('select');
   select.setAttribute("class", "selector");
   select.setAttribute("id", id);
   select.addEventListener('change', function(){
     this.resetPending = true;
   }.bind(this));
-
   options.forEach(option => {
     let newOption = document.createElement('option');
     newOption.setAttribute("value", option);
@@ -63,7 +64,7 @@ GameUI.prototype.selectMaker = function (id, options) {
   })
 
   let label = document.createElement('label');
-  label.innerHTML = id;
+  label.innerHTML = labelText;
   label.appendChild(select)
   return label;
 };
@@ -76,9 +77,24 @@ GameUI.prototype.updateMusicOptions = function () {
   return this.musicOptions;
 };
 
-GameUI.prototype.demoSelector = function () {
-
+GameUI.prototype.demoSelector = function (demoEl) {
+  demoOptions = ['WhenTheSaintGoMarchingIn'];
+  demoEl.appendChild(this.selectMaker("track", "Choose a Demo Track", demoOptions));
+  demoEl.appendChild(this.buttonMaker("demo-start", "Play this Demo", this.playDemo));
 };
+
+GameUI.prototype.playDemo = function() {
+  let trackEl = document.getElementById('track');
+  let track = Tracks[trackEl.value];
+  document.getElementById('scale').value = track.scale;
+  document.getElementById('pattern').value = track.pattern;
+  document.getElementById('tempo').value = track.tempo;
+  this.musicOptions.timeSig = track.timeSig;
+  this.resetPending = true;
+  this.track = track;
+  this.start();
+};
+
 
 GameUI.prototype.setupButtons = function (dashboardEl) {
   dashboardEl.appendChild(this.buttonMaker("start-button", "Start", this.start));
@@ -99,10 +115,12 @@ GameUI.prototype.buttonMaker = function(id, text, callback) {
 
 GameUI.prototype.start = function() {
   document.getElementById("start-button").setAttribute("disabled", 'true');
+  document.getElementById("demo-start").setAttribute("disabled", 'true');
+
   if (this.resetPending){
-    this.updateMusicOptions();
     this.musicTracker.resetKeyboard();
-    this.musicTracker.reset(this.musicOptions);
+    this.updateMusicOptions();
+    this.musicTracker.reset(this.musicOptions, this.track);
   }
   this.canvas.animate();
   this.musicTracker.start();
@@ -112,7 +130,9 @@ GameUI.prototype.stop = function () {
   this.canvas.stopAnimation();
   this.musicTracker.stop();
   document.getElementById("start-button").removeAttribute("disabled");
+  document.getElementById("demo-start").removeAttribute("disabled");
   this.resetPending = false;
+  this.track = undefined;
 };
 
 GameUI.prototype.loadTrack = function (track){

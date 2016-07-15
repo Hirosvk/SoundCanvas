@@ -7,37 +7,19 @@ const keyMatch = ['KeyA','KeyS','KeyD','KeyF','KeyG','KeyH','KeyJ','KeyK','KeyL'
 
 let _keydown, _keyup;
 
-function Keyboard(options, track, trackOptions){
+function Keyboard(keyboardEl, options, track){
+  this.keyboardEl = keyboardEl;
   this.notes = Transpose.generateNotes(options.scale, options.root);
   this.keyMatch = keyMatch.slice(0, this.notes.length);
   this.updateNotes = options.updateNotes;
-  this.keyNodes = [];
+  this.setupKeys();
+  this.track = track;
 }
 
-Keyboard.prototype.loadTrack = function (track, trackOptions){
-  this.track = track;
-  this.trackOptions = {
-    tempo: trackOptions.tempo,
-    timeSig: trackOptions.timeSig
-  };
-};
-
-Keyboard.prototype.unloadTrack = function () {
-  this.track = undefined;
-  this.trackOptions = undefined;
-};
-
-Keyboard.prototype.showKeys = function () {
-  this.notes.forEach(note => {
-    console.log(note);
-  });
-};
-
-
-Keyboard.prototype.setupKeys = function (keyboardEl) {
+Keyboard.prototype.setupKeys = function () {
   let _boardEl = document.getElementById('keyboard');
   if (_boardEl){
-    keyboardEl.removeChild(_boardEl);
+    this.keyboardEl.removeChild(_boardEl);
   }
 
   const boardEl = document.createElement('ul');
@@ -53,13 +35,12 @@ Keyboard.prototype.setupKeys = function (keyboardEl) {
     newKey.addEventListener("mouseup", this.releaseKey.bind(this));
     newKey.addEventListener("mouseout", this.releaseKey.bind(this));
     boardEl.appendChild(newKey);
-    this.keyNodes.push(newKey);
   });
   _keydown = this.keydown.bind(this)
   _keyup = this.keyup.bind(this)
   document.addEventListener("keydown", _keydown);
   document.addEventListener("keyup", _keyup);
-  keyboardEl.appendChild(boardEl);
+  this.keyboardEl.appendChild(boardEl);
 };
 
 Keyboard.prototype.pressKey = function (event){
@@ -78,7 +59,6 @@ Keyboard.prototype.keydown = function(event) {
     event.preventDefault();
     idx = this.keyMatch.indexOf(event.code);
   }
-
   if (idx > -1) {
     if (this.notes[idx].start()){
       this.updateNotes(this.notes[idx].name);
@@ -115,7 +95,6 @@ Keyboard.prototype.managePlayback = function(){
       }
     }
   })
-  // update indices below
   if (this.noteIdx === this.track.noteLength - 1){
     this.noteIdx = 0;
     if (this.barIdx === this.track.barLength - 1){
@@ -131,8 +110,8 @@ Keyboard.prototype.managePlayback = function(){
 Keyboard.prototype.playTrack = function(){
   if (this.track){
     let interval = 1000 /
-        (this.track.noteLength / this.trackOptions.timeSig) *
-        (60/this.trackOptions.tempo);
+        (this.track.noteLength / this.track.timeSig) *
+        (60/this.track.tempo);
     this.currentTrack = setInterval(this.managePlayback.bind(this), interval);
   }
 };
@@ -149,11 +128,6 @@ Keyboard.prototype.clearNotes = function () {
 };
 
 Keyboard.prototype.removeListeners = function () {
-  this.keyNodes.forEach( node => {
-    node.removeEventListener("mousedown", this.pressKey.bind(this));
-    node.removeEventListener("mouseup", this.releaseKey.bind(this));
-    node.removeEventListener("mouseout", this.releaseKey.bind(this));
-  })
   document.removeEventListener("keydown", _keydown);
   document.removeEventListener("keyup", _keyup);
 };

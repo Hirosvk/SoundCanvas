@@ -7,6 +7,7 @@ ul.keyboard {
   margin: 10px;
   display: flex;
   max-width: 800px;
+  justify-content: center;
 }
 
 li.key {
@@ -15,18 +16,48 @@ li.key {
   border: 2px solid #5C5C5C;
   text-align: center;
   font-weight: bold;
+  font-size: large;
 }
 
 li.key.active{
   background: black;
 }
 
-.dashboard {
+.dashboard, .options, .demo-selector{
   margin: 10px;
+  text-align: center;
 }
 
-.dashboard button {
+
+div button{
   border: 2px solid #5C5C5C;
   margin: 2px;
   padding: 5px;
+
+  font-size: medium;
+}
+
+.dashboard button {
+  margin: 5px;
+  padding: 7px;
+  font-size: large;
+}
+
+div select {
+  border: 0.5px solid #5C5C5C;
+  padding: 1px;
+  margin: 2px;
+}
+
+button,
+input[type="submit"], a {
+  cursor: pointer;
+}
+
+button[disabled] {
+  background-color: #5C5C5C;
+}
+
+div label {
+  margin: 10px;
 }

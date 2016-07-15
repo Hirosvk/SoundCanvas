@@ -16,7 +16,7 @@
 
 div, span, p,
 select, li, ul,
-h1, h2, h3, h4, button {
+h1, h2, h3, h4, button, label {
   margin: 0;
   padding: 0;
   border: 0;
@@ -39,10 +39,6 @@ ul {
   list-style: none;
 }
 
-button,
-input[type="submit"], a {
-  cursor: pointer;
-}
 
 h1 {
   font-weight: bold;
@@ -54,12 +50,13 @@ h1 {
 h2 {
   font-weight: bold;
   font-size: x-large;
+  margin: 10px 10px 0px 10px;
 }
 
-h3
- {
+p {
   font-weight: normal;
   font-size: large;
+  margin: 0px 0px 0px 20px;
 }
 
 h4 {
