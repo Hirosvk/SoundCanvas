@@ -54,8 +54,9 @@ input[type="submit"], a {
   cursor: pointer;
 }
 
-button[disabled] {
-  background-color: #5C5C5C;
+button[disabled],
+select[disabled] {
+  background-color: #8C8C8C;
 }
 
 div label {

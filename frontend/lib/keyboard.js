@@ -30,14 +30,14 @@ Keyboard.prototype.setupKeys = function () {
     let newKey = document.createElement('li');
     newKey.setAttribute("class", "key");
     newKey.innerHTML = `${note.name} : ${this.keyMatch[idx]}`;
-    newKey.id = idx
+    newKey.id = idx;
     newKey.addEventListener("mousedown", this.pressKey.bind(this));
     newKey.addEventListener("mouseup", this.releaseKey.bind(this));
     newKey.addEventListener("mouseout", this.releaseKey.bind(this));
     boardEl.appendChild(newKey);
   });
-  _keydown = this.keydown.bind(this)
-  _keyup = this.keyup.bind(this)
+  _keydown = this.keydown.bind(this);
+  _keyup = this.keyup.bind(this);
   document.addEventListener("keydown", _keydown);
   document.addEventListener("keyup", _keyup);
   this.keyboardEl.appendChild(boardEl);
@@ -83,42 +83,51 @@ Keyboard.prototype.keyup = function(event){
 
 
 Keyboard.prototype.managePlayback = function(){
-  this.barIdx = this.barIdx || 0;
-  this.noteIdx = this.noteIdx || 0;
-  this.keyMatch.forEach( (key, idx) => {
-    if (this.track[idx]){
-      let note = this.track[idx][this.barIdx][this.noteIdx];
-      if (note) {
-        this.keydown(idx);
-      } else {
-        this.keyup(idx);
-      }
-    }
-  })
-  if (this.noteIdx === this.track.noteLength - 1){
-    this.noteIdx = 0;
-    if (this.barIdx === this.track.barLength - 1){
-      this.barIdx = 0;
-    } else {
-      this.barIdx++;
-    }
-  } else {
-    this.noteIdx++;
-  }
-};
-
-Keyboard.prototype.playTrack = function(){
   if (this.track){
-    let interval = 1000 /
-        (this.track.noteLength / this.track.timeSig) *
-        (60/this.track.tempo);
-    this.currentTrack = setInterval(this.managePlayback.bind(this), interval);
+    this.barIdx = this.barIdx || 0;
+    this.noteIdx = this.noteIdx || 0;
+    this.keyMatch.forEach( (key, idx) => {
+      if (this.track[idx]){
+        let note = this.track[idx][this.barIdx][this.noteIdx];
+        if (note) {
+          this.keydown(idx);
+        } else {
+          this.keyup(idx);
+        }
+      }
+    });
+    if (this.noteIdx === this.track.noteLength - 1){
+      this.noteIdx = 0;
+      if (this.barIdx === this.track.barLength - 1){
+        this.barIdx = 0;
+      } else {
+        this.barIdx++;
+      }
+    } else {
+      this.noteIdx++;
+    }
   }
 };
 
-Keyboard.prototype.stopTrack = function () {
-  clearInterval(this.currentTrack);
+// Keyboard.prototype.playTrack = function(){
+//   if (this.track){
+//     let interval = 1000 /
+//         (this.track.noteLength / this.track.timeSig) *
+//         (60/this.track.tempo);
+//     this.currentTrack = setInterval(this.managePlayback.bind(this), interval);
+//   }
+// };
+//
+// Keyboard.prototype.stopTrack = function () {
+//   clearInterval(this.currentTrack);
+//   this.clearNotes();
+// };
+
+
+Keyboard.prototype.stop = function () {
   this.clearNotes();
+  this.removeListeners();
+  this.track = undefined;
 };
 
 Keyboard.prototype.clearNotes = function () {
@@ -132,9 +141,9 @@ Keyboard.prototype.removeListeners = function () {
   document.removeEventListener("keyup", _keyup);
 };
 
-Keyboard.prototype.unloadTrack = function () {
-  this.track = undefined;
-};
+// Keyboard.prototype.unloadTrack = function () {
+//   this.track = undefined;
+// };
 
 
 module.exports = Keyboard;

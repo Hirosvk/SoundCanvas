@@ -2,6 +2,8 @@ const MusicTracker = require('./music_tracker.js');
 const Canvas = require('./canvas.js');
 const Tracks = require('../constants/tracks.js');
 
+const TrackOptions = Object.getOwnPropertyNames(Tracks);
+
 function GameUI(){
   this.resetPending = false;
 }
@@ -15,8 +17,8 @@ const DefaultMusicOptions = {
 };
 
 GameUI.prototype.receiveNotes = function (notes) {
-  console.log(notes);
   this.canvas.receiveNotes(notes);
+  console.log(notes);
 };
 
 GameUI.prototype.setupMusicTracker = function (keyboardEl) {
@@ -78,7 +80,7 @@ GameUI.prototype.updateMusicOptions = function () {
 };
 
 GameUI.prototype.demoSelector = function (demoEl) {
-  let demoOptions = ['WhenTheSaintGoMarchingIn', 'demoBlue', 'demoYellow'];
+  let demoOptions = TrackOptions;
   demoEl.appendChild(this.selectMaker("track", "Choose a Demo Track", demoOptions));
   demoEl.appendChild(this.buttonMaker("demo-start", "Play this Demo", this.playDemo));
 };
@@ -118,10 +120,10 @@ GameUI.prototype.start = function() {
   document.getElementById("demo-start").setAttribute("disabled", 'true');
 
   if (this.resetPending){
-    this.musicTracker.resetKeyboard();
     this.updateMusicOptions();
     this.musicTracker.reset(this.musicOptions, this.track);
   }
+
   this.canvas.animate();
   this.musicTracker.start();
 };
@@ -133,16 +135,7 @@ GameUI.prototype.stop = function () {
   document.getElementById("demo-start").removeAttribute("disabled");
   this.resetPending = false;
   this.track = undefined;
-  this.musicTracker.unloadTrack();
 };
-
-// GameUI.prototype.loadTrack = function (track){
-//   this.musicTracker.loadTrack(track);
-// };
-//
-// GameUI.prototype.unloadTrack = function () {
-//   this.musicTracker.unloadTrack();
-// };
 
 GameUI.prototype.clearCanvas = function () {
   this.canvas.clearCanvas();

@@ -14,17 +14,15 @@ MusicTracker.prototype.reset = function(options, track){
   let keyboardOptions = {
     updateNotes: this.updateNotes.bind(this),
     scale: options.scale,
-    root: options.root,
-    tempo: options.tempo
-  }
+    root: options.root
+  };
   let beatMakerOptions = {
-    setListenStatus: this.setListenStatus.bind(this),
     emitNotes: this.emitNotes.bind(this),
     clearStore: this.clearStore.bind(this),
-    tempo: options.tempo,
-    timeSig: options.timeSig,
     pattern: options.pattern
-  }
+  };
+
+  this.options = options;
 
   this.keyboard = new Keyboard (
     this.keyboardEl,
@@ -42,7 +40,7 @@ MusicTracker.prototype.emitNotes = function(){
 
 MusicTracker.prototype.clearStore = function(){
   this.trackerStore = [];
-}
+};
 
 MusicTracker.prototype.setListenStatus = function (boolean) {
   this.beatOn = boolean;
@@ -55,28 +53,37 @@ MusicTracker.prototype.updateNotes = function (note) {
   }
 };
 
-// MusicTracker.prototype.loadTrack = function (track) {
-//   this.track = track;
-//   this.keyboard.loadTrack(track, this.trackOptions);
-// };
-//
-MusicTracker.prototype.unloadTrack = function () {
-  this.track = undefined;
-  this.keyboard.unloadTrack();
-};
 
-MusicTracker.prototype.start = function () {
-  this.keyboard.playTrack();
-  this.beatMaker.start();
+// MusicTracker.prototype.unloadTrack = function () {
+//   this.track = undefined;
+//   this.keyboard.unloadTrack();
+// };
+
+// MusicTracker.prototype.start = function () {
+//   this.beatMaker.start();
+//   this.keyboard.playTrack();
+// };
+
+MusicTracker.prototype.start = function(){
+  const interval = 1000 /
+      (8 / this.options.timeSig) *
+      (60/this.options.tempo);
+      // tracks and beat patterns are written in 1/8 notes.
+  this.setListenStatus(true);
+  this.demoPlayback = setInterval(function(){
+    this.keyboard.managePlayback.call(this.keyboard);
+    this.beatMaker.manageBeat.call(this.beatMaker);
+  }.bind(this), interval);
 };
 
 MusicTracker.prototype.stop = function(){
-  this.keyboard.stopTrack();
-  this.beatMaker.stop();
-}
-
-MusicTracker.prototype.resetKeyboard = function () {
-  this.keyboard.removeListeners();
+  this.keyboard.stop();
+  clearInterval(this.demoPlayback);
+  this.setListenStatus(false);
 };
+
+// MusicTracker.prototype.resetKeyboard = function () {
+//   this.keyboard.removeListeners();
+// };
 
 module.exports = MusicTracker;

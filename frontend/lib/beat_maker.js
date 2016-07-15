@@ -2,13 +2,13 @@ const KickDrum = require('./drum.js').KickDrum;
 const BeatPatterns = require('../constants/beat_patterns.js');
 
 function BeatMaker(options){
-  this.tempo = options.tempo;
+  // this.tempo = options.tempo;
   this.pattern = BeatPatterns[options.pattern];
-  this.timeSig = options.timeSig;
+  // this.timeSig = options.timeSig;
 
   this.emitNotes = options.emitNotes;
   this.clearStore = options.clearStore;
-  this.setListenStatus = options.setListenStatus;
+  // this.setListenStatus = options.setListenStatus;
   this.drum = new KickDrum;
 }
 
@@ -34,17 +34,16 @@ BeatMaker.prototype.manageBeat = function () {
 };
 
 
-BeatMaker.prototype.start = function () {
-  this.setListenStatus(true);
-  let interval = 1000 / (this.pattern[0].length / this.timeSig) * (60/this.tempo);
-  console.log(interval);
-  this.currentBeat = setInterval(this.manageBeat.bind(this), interval);
-};
-
-BeatMaker.prototype.stop = function () {
-  this.setListenStatus(false);
-  if (this.currentBeat) { clearInterval(this.currentBeat); }
-};
+// BeatMaker.prototype.start = function () {
+//   this.setListenStatus(true);
+//   let interval = 1000 / (this.pattern[0].length / this.timeSig) * (60/this.tempo);
+//   this.currentBeat = setInterval(this.manageBeat.bind(this), interval);
+// };
+//
+// BeatMaker.prototype.stop = function () {
+//   this.setListenStatus(false);
+//   if (this.currentBeat) { clearInterval(this.currentBeat); }
+// };
 
 
 module.exports = BeatMaker;
