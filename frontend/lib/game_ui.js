@@ -79,10 +79,10 @@ GameUI.prototype.updateMusicOptions = function () {
   return this.musicOptions;
 };
 
-GameUI.prototype.demoSelector = function (demoEl) {
+GameUI.prototype.setupDemoSelector = function (demoEl) {
   let demoOptions = TrackOptions;
   demoEl.appendChild(this.selectMaker("track", "Choose a Demo Track", demoOptions));
-  demoEl.appendChild(this.buttonMaker("demo-start", "Play this Demo", this.playDemo));
+  demoEl.appendChild(this.buttonMaker("demo-start", "Watch Demo", this.playDemo));
 };
 
 GameUI.prototype.playDemo = function() {
@@ -99,7 +99,7 @@ GameUI.prototype.playDemo = function() {
 
 
 GameUI.prototype.setupButtons = function (dashboardEl) {
-  dashboardEl.appendChild(this.buttonMaker("start-button", "Start", this.start));
+  dashboardEl.appendChild(this.buttonMaker("start-button", "Activate Canvas", this.start));
   dashboardEl.appendChild(this.buttonMaker("stop-button", "Stop", this.stop));
   dashboardEl.appendChild(this.buttonMaker("clear-canvas-button", "Clear Canvas", this.clearCanvas));
 };
@@ -116,12 +116,18 @@ GameUI.prototype.buttonMaker = function(id, text, callback) {
 };
 
 GameUI.prototype.start = function() {
+  this.musicTracker.stop();
+  this.canvas.clearCanvas();
+
   document.getElementById("start-button").setAttribute("disabled", 'true');
   document.getElementById("demo-start").setAttribute("disabled", 'true');
 
-  if (this.resetPending){
-    this.updateMusicOptions();
-    this.musicTracker.reset(this.musicOptions, this.track);
+  this.updateMusicOptions();
+  this.musicTracker.reset(this.musicOptions, this.track);
+
+  let selectors = document.getElementsByTagName('select');
+  for (let i = 0; i < selectors.length; i++){
+    selectors[i].setAttribute("disabled", true);
   }
 
   this.canvas.animate();
@@ -133,6 +139,10 @@ GameUI.prototype.stop = function () {
   this.musicTracker.stop();
   document.getElementById("start-button").removeAttribute("disabled");
   document.getElementById("demo-start").removeAttribute("disabled");
+  let selectors = document.getElementsByTagName('select');
+  for (let i = 0; i < selectors.length; i++){
+    selectors[i].removeAttribute("disabled");
+  }
   this.resetPending = false;
   this.track = undefined;
 };

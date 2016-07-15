@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function(){
   gameUI.setupMusicTracker(musicFrame);
   gameUI.setupButtons(document.getElementById('dashboard'));
   gameUI.setupSelects(document.getElementById('options'));
-  gameUI.demoSelector(document.getElementById('demo-selector'));
+  gameUI.setupDemoSelector(document.getElementById('demo-selector'));
 
 
   window.gameUI = gameUI;

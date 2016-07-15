@@ -77,7 +77,7 @@ MusicTracker.prototype.start = function(){
 };
 
 MusicTracker.prototype.stop = function(){
-  this.keyboard.stop();
+  this.keyboard.stop.call(this.keyboard);
   clearInterval(this.demoPlayback);
   this.setListenStatus(false);
 };
