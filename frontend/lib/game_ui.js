@@ -3,20 +3,29 @@ const Canvas = require('./canvas.js');
 const Tracks = require('../constants/tracks.js');
 
 function GameUI(){
-  this.active = false;
+  this.resetPending = false;
 }
 
+const DefaultMusicOptions = {
+  scale: "major",
+  root: "C4",
+  tempo: 120,
+  pattern: "FourBeat",
+  timeSig: 4
+};
+
 GameUI.prototype.receiveNotes = function (notes) {
+  console.log(notes);
   this.canvas.receiveNotes(notes);
 };
 
-GameUI.prototype.setupMusicTracker = function (keyboardEl, musicOptions) {
+GameUI.prototype.setupMusicTracker = function (keyboardEl) {
   this.musicTracker = new MusicTracker (
-    musicOptions.keyboard,
-    musicOptions.beatMaker,
-    this.receiveNotes.bind(this)
+    DefaultMusicOptions,
+    this.receiveNotes.bind(this),
+    keyboardEl
   );
-  this.musicTracker.setupKeys(keyboardEl);
+  this.musicOptions = DefaultMusicOptions;
 };
 //
 GameUI.prototype.setupCanvas = function (canvasEl, dims) {
@@ -26,19 +35,45 @@ GameUI.prototype.setupCanvas = function (canvasEl, dims) {
 };
 
 
-GameUI.prototype.setupSelects = function () {
-
+GameUI.prototype.setupSelects = function (optionEl) {
+  scaleOptions = ["major",'minor']
+  optionEl.appendChild(this.selectMaker("scale", scaleOptions));
+  tempoOptions = [140,120, 100, 80, 60, 40];
+  optionEl.appendChild(this.selectMaker("tempo", tempoOptions));
+  patternOptions = ['FourBeat', 'FourBeat2'];
+  optionEl.appendChild(this.selectMaker("pattern", patternOptions));
 };
 
-GameUI.prototype.selectMaker = function () {
+GameUI.prototype.selectMaker = function (id, options) {
+  let select = document.createElement('select');
+  select.setAttribute("class", "selector");
+  select.setAttribute("id", id);
+  select.addEventListener('change', function(){
+    this.resetPending = true;
+  }.bind(this));
 
+  options.forEach(option => {
+    let newOption = document.createElement('option');
+    newOption.setAttribute("value", option);
+    if (this.musicOptions[id] === option){
+      newOption.setAttribute("selected", "true")
+    }
+    newOption.innerHTML = option;
+    select.appendChild(newOption);
+  })
+
+  let label = document.createElement('label');
+  label.innerHTML = id;
+  label.appendChild(select)
+  return label;
 };
 
-GameUI.prototype.updateTempo = function () {
-
-};
-GameUI.prototype.updateBeat = function () {
-
+GameUI.prototype.updateMusicOptions = function () {
+  let selectors = document.getElementsByClassName('selector')
+  for (let i = 0; i < selectors.length; i++){
+    this.musicOptions[selectors[i].id] = selectors[i].value;
+  }
+  return this.musicOptions;
 };
 
 GameUI.prototype.demoSelector = function () {
@@ -63,15 +98,21 @@ GameUI.prototype.buttonMaker = function(id, text, callback) {
 };
 
 GameUI.prototype.start = function() {
+  document.getElementById("start-button").setAttribute("disabled", 'true');
+  if (this.resetPending){
+    this.updateMusicOptions();
+    this.musicTracker.resetKeyboard();
+    this.musicTracker.reset(this.musicOptions);
+  }
   this.canvas.animate();
   this.musicTracker.start();
-  document.getElementById("start-button").setAttribute("disabled", 'true');
 };
 
 GameUI.prototype.stop = function () {
   this.canvas.stopAnimation();
   this.musicTracker.stop();
   document.getElementById("start-button").removeAttribute("disabled");
+  this.resetPending = false;
 };
 
 GameUI.prototype.loadTrack = function (track){

@@ -9,19 +9,11 @@ document.addEventListener("DOMContentLoaded", function(){
   gameUI.setupCanvas(canvasEl, [canvasEl.width, canvasEl.height]);
 
   const musicFrame = document.getElementById('music-tracker');
-  const musicOptions = {
-    keyboard:  {
-      scale: "major",
-      root: "C4"
-    },
-    beatMaker: {
-      tempo: 120,
-      pattern: "FourBeat2",
-      timeSig: 4
-    }
-  };
-  gameUI.setupMusicTracker(musicFrame, musicOptions);
+
+  gameUI.setupMusicTracker(musicFrame);
   gameUI.setupButtons(document.getElementById('dashboard'));
+  gameUI.setupSelects(document.getElementById('options'));
+
 
   window.gameUI = gameUI;
   window.canvas = gameUI.canvas;

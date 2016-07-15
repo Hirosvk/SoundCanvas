@@ -5,11 +5,13 @@ const KickDrum = require('./drum.js').KickDrum;
 
 const keyMatch = ['KeyA','KeyS','KeyD','KeyF','KeyG','KeyH','KeyJ','KeyK','KeyL'];
 
+let _keydown, _keyup;
 
 function Keyboard(options, track, trackOptions){
   this.notes = Transpose.generateNotes(options.scale, options.root);
   this.keyMatch = keyMatch.slice(0, this.notes.length);
   this.updateNotes = options.updateNotes;
+  this.keyNodes = [];
 }
 
 Keyboard.prototype.loadTrack = function (track, trackOptions){
@@ -33,8 +35,15 @@ Keyboard.prototype.showKeys = function () {
 
 
 Keyboard.prototype.setupKeys = function (keyboardEl) {
+  let _boardEl = document.getElementById('keyboard');
+  if (_boardEl){
+    keyboardEl.removeChild(_boardEl);
+  }
+
   const boardEl = document.createElement('ul');
   boardEl.setAttribute("class", 'keyboard');
+  boardEl.setAttribute("id", 'keyboard');
+
   this.notes.forEach((note, idx) => {
     let newKey = document.createElement('li');
     newKey.setAttribute("class", "key");
@@ -44,12 +53,12 @@ Keyboard.prototype.setupKeys = function (keyboardEl) {
     newKey.addEventListener("mouseup", this.releaseKey.bind(this));
     newKey.addEventListener("mouseout", this.releaseKey.bind(this));
     boardEl.appendChild(newKey);
+    this.keyNodes.push(newKey);
   });
-
-  document.addEventListener("keydown", this.keydown.bind(this));
-
-  document.addEventListener("keyup", this.keyup.bind(this));
-
+  _keydown = this.keydown.bind(this)
+  _keyup = this.keyup.bind(this)
+  document.addEventListener("keydown", _keydown);
+  document.addEventListener("keyup", _keyup);
   keyboardEl.appendChild(boardEl);
 };
 
@@ -137,6 +146,16 @@ Keyboard.prototype.clearNotes = function () {
   this.keyMatch.forEach((key, idx) => {
     this.notes[idx].stop();
   })
+};
+
+Keyboard.prototype.removeListeners = function () {
+  this.keyNodes.forEach( node => {
+    node.removeEventListener("mousedown", this.pressKey.bind(this));
+    node.removeEventListener("mouseup", this.releaseKey.bind(this));
+    node.removeEventListener("mouseout", this.releaseKey.bind(this));
+  })
+  document.removeEventListener("keydown", _keydown);
+  document.removeEventListener("keyup", _keyup);
 };
 
 
