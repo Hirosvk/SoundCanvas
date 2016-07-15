@@ -82,10 +82,10 @@ Canvas.prototype.generateColors = function (notes) {
     let _notes = notes.slice();
     _notes.splice(i, 1);
     colors[notes[i]] = _notes.map( _note => {
-      return Colors[Transpose.interval(notes[i], _note)]
-    })
+      return Colors[Transpose.interval(notes[i], _note)];
+    });
   }
-  return colors
+  return colors;
 };
 
 
@@ -157,7 +157,13 @@ Canvas.prototype.stopAnimation = function(){
 };
 
 Canvas.prototype.clearCanvas = function(){
-  this.ctx.clearRect(0,0,this.dims[0],this.dims[1])
+  for (let y = 0; y <= this.ySize; y++){
+    for(let x = 0; x <= this.xSize + 1; x++){
+      this.grid[[x,y]].reset();
+    }
+  }
+  this.ctx.clearRect(0,0,this.dims[0],this.dims[1]);
+
 };
 
 module.exports = Canvas;

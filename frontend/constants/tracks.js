@@ -25,7 +25,7 @@ const WhenTheSaintGoMarchingIn = {
   ],
   barLength: 8,
   noteLength: 8,
-  scale: "major",
+  scale: "Major",
   timeSig: 4,
   pattern: "DownBeat",
   tempo: 180
@@ -59,10 +59,10 @@ const BlueButterfly = {
   ],
   barLength: 4,
   noteLength: 8,
-  scale: "major",
+  scale: "Major",
   timeSig: 4,
   pattern: "FunBeat",
-  tempo: 120
+  tempo: 100
 };
 
 
@@ -93,7 +93,7 @@ const HoneyBee = {
   ],
   barLength: 3,
   noteLength: 8,
-  scale: "major",
+  scale: "Major",
   timeSig: 4,
   pattern: "FourBeat",
   tempo: 120
@@ -126,10 +126,10 @@ const Colorful7th = {
   ],
   barLength: 4,
   noteLength: 8,
-  scale: "major",
+  scale: "Major",
   timeSig: 4,
   pattern: "FourBeat",
-  tempo: 120
+  tempo: 140
 };
 
 

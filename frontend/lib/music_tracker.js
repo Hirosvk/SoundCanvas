@@ -54,21 +54,10 @@ MusicTracker.prototype.updateNotes = function (note) {
 };
 
 
-// MusicTracker.prototype.unloadTrack = function () {
-//   this.track = undefined;
-//   this.keyboard.unloadTrack();
-// };
-
-// MusicTracker.prototype.start = function () {
-//   this.beatMaker.start();
-//   this.keyboard.playTrack();
-// };
-
 MusicTracker.prototype.start = function(){
   const interval = 1000 /
       (8 / this.options.timeSig) *
       (60/this.options.tempo);
-      // tracks and beat patterns are written in 1/8 notes.
   this.setListenStatus(true);
   this.demoPlayback = setInterval(function(){
     this.keyboard.managePlayback.call(this.keyboard);
@@ -82,8 +71,5 @@ MusicTracker.prototype.stop = function(){
   this.setListenStatus(false);
 };
 
-// MusicTracker.prototype.resetKeyboard = function () {
-//   this.keyboard.removeListeners();
-// };
 
 module.exports = MusicTracker;

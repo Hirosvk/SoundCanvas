@@ -3,7 +3,8 @@ const Scales = require('../constants/scales.js');
 const Transpose = require('../utils/transpose.js');
 const KickDrum = require('./drum.js').KickDrum;
 
-const keyMatch = ['KeyA','KeyS','KeyD','KeyF','KeyG','KeyH','KeyJ','KeyK','KeyL'];
+const keyMatch = ['KeyA','KeyS','KeyD','KeyF','KeyG','KeyH','KeyJ','KeyK','KeyN', 'KeyM',
+                  'Comma', 'Period', 'Slash'];
 
 let _keydown, _keyup;
 
@@ -12,8 +13,8 @@ function Keyboard(keyboardEl, options, track){
   this.notes = Transpose.generateNotes(options.scale, options.root);
   this.keyMatch = keyMatch.slice(0, this.notes.length);
   this.updateNotes = options.updateNotes;
-  this.setupKeys();
   this.track = track;
+  this.setupKeys();
 }
 
 Keyboard.prototype.setupKeys = function () {
@@ -29,17 +30,19 @@ Keyboard.prototype.setupKeys = function () {
   this.notes.forEach((note, idx) => {
     let newKey = document.createElement('li');
     newKey.setAttribute("class", "key");
-    newKey.innerHTML = `${note.name} : ${this.keyMatch[idx]}`;
+    newKey.innerHTML = `${note.name}<br/>${this.keyMatch[idx]}`;
     newKey.id = idx;
     newKey.addEventListener("mousedown", this.pressKey.bind(this));
     newKey.addEventListener("mouseup", this.releaseKey.bind(this));
     newKey.addEventListener("mouseout", this.releaseKey.bind(this));
     boardEl.appendChild(newKey);
   });
-  _keydown = this.keydown.bind(this);
-  _keyup = this.keyup.bind(this);
-  document.addEventListener("keydown", _keydown);
-  document.addEventListener("keyup", _keyup);
+  if (!this.track){
+    _keydown = this.keydown.bind(this);
+    _keyup = this.keyup.bind(this);
+    document.addEventListener("keydown", _keydown);
+    document.addEventListener("keyup", _keyup);
+  }
   this.keyboardEl.appendChild(boardEl);
 };
 
@@ -109,21 +112,6 @@ Keyboard.prototype.managePlayback = function(){
   }
 };
 
-// Keyboard.prototype.playTrack = function(){
-//   if (this.track){
-//     let interval = 1000 /
-//         (this.track.noteLength / this.track.timeSig) *
-//         (60/this.track.tempo);
-//     this.currentTrack = setInterval(this.managePlayback.bind(this), interval);
-//   }
-// };
-//
-// Keyboard.prototype.stopTrack = function () {
-//   clearInterval(this.currentTrack);
-//   this.clearNotes();
-// };
-
-
 Keyboard.prototype.stop = function () {
   this.clearNotes();
   this.removeListeners();
@@ -140,10 +128,6 @@ Keyboard.prototype.removeListeners = function () {
   document.removeEventListener("keydown", _keydown);
   document.removeEventListener("keyup", _keyup);
 };
-
-// Keyboard.prototype.unloadTrack = function () {
-//   this.track = undefined;
-// };
 
 
 module.exports = Keyboard;
