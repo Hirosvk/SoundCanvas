@@ -8,5 +8,17 @@ module.exports = {
   devtool: 'source-maps',
   resolve: {
     extensions: ["", ".js", ".jsx" ]
-  }
+  },
+  module: {
+    loaders: [
+      {
+        test: [/\.jsx?$/, /\.js?$/],
+        exclude: /node_modules/,
+        loader: 'babel',
+        query: {
+          presets: ['es2015']
+        }
+      }
+    ]
+  },
 };
