@@ -79,7 +79,7 @@ Canvas.prototype.addColorTile = function (pos, color, dirCode){
 Canvas.prototype.generateColors = function (notes) {
   let colors = {};
   for(let i = 0; i < notes.length; i++){
-    _notes = notes.slice();
+    let _notes = notes.slice();
     _notes.splice(i, 1);
     colors[notes[i]] = _notes.map( _note => {
       return Colors[Transpose.interval(notes[i], _note)]

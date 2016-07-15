@@ -11,13 +11,13 @@ function MusicTracker (options, passNotesToUI, keyboardEl){
 }
 
 MusicTracker.prototype.reset = function(options, track){
-  keyboardOptions = {
+  let keyboardOptions = {
     updateNotes: this.updateNotes.bind(this),
     scale: options.scale,
     root: options.root,
     tempo: options.tempo
   }
-  beatMakerOptions = {
+  let beatMakerOptions = {
     setListenStatus: this.setListenStatus.bind(this),
     emitNotes: this.emitNotes.bind(this),
     clearStore: this.clearStore.bind(this),

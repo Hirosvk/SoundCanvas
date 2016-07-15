@@ -36,11 +36,11 @@ GameUI.prototype.setupCanvas = function (canvasEl, dims) {
 
 
 GameUI.prototype.setupSelects = function (optionEl) {
-  scaleOptions = ["major",'minor']
+  let scaleOptions = ["major",'minor']
   optionEl.appendChild(this.selectMaker("scale", "Scale", scaleOptions));
-  tempoOptions = [160, 140, 120, 100, 80, 60, 40];
+  let tempoOptions = [160, 140, 120, 100, 80, 60, 40];
   optionEl.appendChild(this.selectMaker("tempo", "Tempo", tempoOptions));
-  patternOptions = ['FourBeat', 'FourBeat2'];
+  let patternOptions = ['FourBeat', 'FourBeat2'];
   optionEl.appendChild(this.selectMaker("pattern", "Beat Pattern", patternOptions));
 //   timeSigOptions = [4, 3, 2];
 //   optionEl.appendChild(this.selectMaker("timeSig", "Time Signature", timeSigOptions));
@@ -78,7 +78,7 @@ GameUI.prototype.updateMusicOptions = function () {
 };
 
 GameUI.prototype.demoSelector = function (demoEl) {
-  demoOptions = ['WhenTheSaintGoMarchingIn'];
+  let demoOptions = ['WhenTheSaintGoMarchingIn'];
   demoEl.appendChild(this.selectMaker("track", "Choose a Demo Track", demoOptions));
   demoEl.appendChild(this.buttonMaker("demo-start", "Play this Demo", this.playDemo));
 };
