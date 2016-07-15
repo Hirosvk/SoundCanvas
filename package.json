@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "entry.jsx",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -13,5 +10,6 @@
   },
   "scripts": {
     "webpack": "webpack"
-  }
+  },
+  "devtool": "source-map",
 }
