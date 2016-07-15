@@ -10,7 +10,7 @@
   },
   "scripts": {
     "webpack": "webpack",
-    "postinstall": "./node_module/.bin/webpack"
+    "postinstall": "./node_modules/.bin/webpack"
   },
   "devtool": "source-map",
   "engines":{
