@@ -9,7 +9,12 @@
     "webpack": "^1.13.1"
   },
   "scripts": {
-    "webpack": "webpack"
+    "webpack": "webpack",
+    "postinstall": "./node_module/.bin/webpack"
   },
-  "devtool": "source-map"
+  "devtool": "source-map",
+  "engines":{
+    "node": "6.2.1",
+    "npm": "3.9.3"
+  }
 }
