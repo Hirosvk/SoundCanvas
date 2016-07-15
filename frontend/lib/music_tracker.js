@@ -60,11 +60,10 @@ MusicTracker.prototype.updateNotes = function (note) {
 //   this.keyboard.loadTrack(track, this.trackOptions);
 // };
 //
-// MusicTracker.prototype.unloadTrack = function () {
-//   this.track = undefined;
-//   this.trackOptions = undefined;
-//   this.keyboard.unloadTrack();
-// };
+MusicTracker.prototype.unloadTrack = function () {
+  this.track = undefined;
+  this.keyboard.unloadTrack();
+};
 
 MusicTracker.prototype.start = function () {
   this.keyboard.playTrack();

@@ -38,9 +38,9 @@ GameUI.prototype.setupCanvas = function (canvasEl, dims) {
 GameUI.prototype.setupSelects = function (optionEl) {
   let scaleOptions = ["major",'minor']
   optionEl.appendChild(this.selectMaker("scale", "Scale", scaleOptions));
-  let tempoOptions = [160, 140, 120, 100, 80, 60, 40];
+  let tempoOptions = [180,160, 140, 120, 100, 80, 60, 40];
   optionEl.appendChild(this.selectMaker("tempo", "Tempo", tempoOptions));
-  let patternOptions = ['FourBeat', 'FourBeat2'];
+  let patternOptions = ['FourBeat', 'DownBeat', 'FunBeat'];
   optionEl.appendChild(this.selectMaker("pattern", "Beat Pattern", patternOptions));
 //   timeSigOptions = [4, 3, 2];
 //   optionEl.appendChild(this.selectMaker("timeSig", "Time Signature", timeSigOptions));
@@ -78,7 +78,7 @@ GameUI.prototype.updateMusicOptions = function () {
 };
 
 GameUI.prototype.demoSelector = function (demoEl) {
-  let demoOptions = ['WhenTheSaintGoMarchingIn'];
+  let demoOptions = ['WhenTheSaintGoMarchingIn', 'demoBlue', 'demoYellow'];
   demoEl.appendChild(this.selectMaker("track", "Choose a Demo Track", demoOptions));
   demoEl.appendChild(this.buttonMaker("demo-start", "Play this Demo", this.playDemo));
 };
@@ -103,7 +103,7 @@ GameUI.prototype.setupButtons = function (dashboardEl) {
 };
 
 GameUI.prototype.buttonMaker = function(id, text, callback) {
-  let button = document.createElement('button')
+  let button = document.createElement('button');
   button.innerHTML = text;
   button.setAttribute("id", id);
   button.addEventListener("click", function(event){
@@ -133,15 +133,16 @@ GameUI.prototype.stop = function () {
   document.getElementById("demo-start").removeAttribute("disabled");
   this.resetPending = false;
   this.track = undefined;
-};
-
-GameUI.prototype.loadTrack = function (track){
-  this.musicTracker.loadTrack(track);
-};
-
-GameUI.prototype.unloadTrack = function () {
   this.musicTracker.unloadTrack();
 };
+
+// GameUI.prototype.loadTrack = function (track){
+//   this.musicTracker.loadTrack(track);
+// };
+//
+// GameUI.prototype.unloadTrack = function () {
+//   this.musicTracker.unloadTrack();
+// };
 
 GameUI.prototype.clearCanvas = function () {
   this.canvas.clearCanvas();

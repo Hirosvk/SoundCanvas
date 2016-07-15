@@ -124,12 +124,16 @@ Keyboard.prototype.stopTrack = function () {
 Keyboard.prototype.clearNotes = function () {
   this.keyMatch.forEach((key, idx) => {
     this.notes[idx].stop();
-  })
+  });
 };
 
 Keyboard.prototype.removeListeners = function () {
   document.removeEventListener("keydown", _keydown);
   document.removeEventListener("keyup", _keyup);
+};
+
+Keyboard.prototype.unloadTrack = function () {
+  this.track = undefined;
 };
 
 
