@@ -16,7 +16,7 @@
 
 div, span, p,
 select, li, ul,
-h1, h2, h3, h4, button, label {
+h1, h2, h3, h4, button, label, a {
   margin: 0;
   padding: 0;
   border: 0;
@@ -62,4 +62,8 @@ p {
 h4 {
   font-weight: normal;
   font-size: medium;
+}
+
+a {
+  text-decoration: underline;
 }
