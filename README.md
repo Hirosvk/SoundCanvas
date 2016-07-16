@@ -6,7 +6,7 @@
 [scrrenshot1]:./screenshots/sound_canvas.jpg
 
 ## Overview
-SoundCanvas turns music into abstract art animation. Make music with the simple interface (you need no musical experience!), and art will appear on the canvas.
+SoundCanvas turns music into abstract art animation. Make music with the simple interface (you need no musical experience!), and art will appear on the canvas. Click [here][live_link] to play.
 
 ## How to Play
 ### Play Demo
