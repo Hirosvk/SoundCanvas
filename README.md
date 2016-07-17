@@ -3,7 +3,7 @@
 [live_link]: http://soundcanvas.heroku.com
 
 ![screeshot1][scrrenshot1]
-[scrrenshot1]:./screenshots/sound_canvas.jpg
+[scrrenshot1]:./sound_canvas.jpg
 
 ## Overview
 SoundCanvas turns music into abstract art animation. Make music with the simple interface (you need no musical experience!), and art will appear on the canvas. Click [here][live_link] to play.
