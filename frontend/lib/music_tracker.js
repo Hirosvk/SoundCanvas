@@ -48,7 +48,7 @@ MusicTracker.prototype.setListenStatus = function (boolean) {
 
 MusicTracker.prototype.updateNotes = function (note) {
   if (this.beatOn){
-    if (this.trackerStore.length > 6 ){this.trackerStore.splice(0,1);}
+    if (this.trackerStore.length > 6 ){this.trackerStore.shift();}
     this.trackerStore.push(note);
   }
 };
