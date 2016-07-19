@@ -1,0 +1,64 @@
+Game UI
+  - setup
+    - setupCanvas: Canvas.setup
+    - setupKeyboard: MusicTracker.setupKeyboard
+    - setupButtons
+
+  - resetMusicTracker -> reset(newOptions)
+  - receiveNotes -> fn: passed to MusicTracker
+
+
+MusicTracker
+  - initialize with...
+  * options = {
+    scale, root, tempo, timeSig
+  } => pass to this.reset()
+  * fn: passNotesToUI
+  * keyboardEl
+
+  * this.keyboard
+  * this.beatMaker
+  * trackerStore
+  * beatOn
+
+
+  - reset(options, track) // so that GameUI can easily update play info without creating new MusicTracker, and w/o giving new keyboardEl and passNotesToUI)
+    - new Keyboard
+    - new BeatMaker
+
+  - updateNotes(): GameUI.receiveNotes -> fn passed to Keyboard
+  - clearStore() -> fn passed to BeatMaker
+
+  - start
+    - setListenStatus(true)
+    - setIntervals for BeatMaker (no track)
+    - setIntervals for BeatMaker & Keyboard (track)
+
+  - stop
+    - keyboard.stop()
+    - setListenStatus(false)
+    - clearInterval
+
+Keyboard
+  - initialize with...
+  * scale
+  * root
+  * fn: updateNotes
+  * track
+
+  - managePlayback
+    -
+  - stop
+    - clear listeners
+    - set track to undefined
+    - clear notes
+
+
+BeatMaker
+  - initialize with...
+  * fn: emitNotes();
+  * fn: clearStore();
+
+  - manageBeat
+    - emitNotes at every beat
+    - clearStore at the end of each bar

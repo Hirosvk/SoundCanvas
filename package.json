@@ -1,0 +1,14 @@
+{
+  "name": "sound_canvas",
+  "version": "1.0.0",
+  "description": "",
+  "main": "entry.jsx",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "webpack": "^1.13.1"
+  },
+  "scripts": {
+    "webpack": "webpack"
+  }
+}
