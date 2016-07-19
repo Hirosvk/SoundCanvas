@@ -62,7 +62,7 @@ const BlueButterfly = {
   scale: "Major",
   timeSig: 4,
   pattern: "FunBeat",
-  tempo: 100
+  tempo: 120
 };
 
 
