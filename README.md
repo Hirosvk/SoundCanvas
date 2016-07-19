@@ -1,6 +1,6 @@
 # SoundCanvas
 [Live Link][live_link]
-[live_link]: http://hirosvk.github.io
+[live_link]: http://hirosvk.github.io/SoundCanvas
 
 ![screeshot1][scrrenshot1]
 [scrrenshot1]:./sound_canvas.jpg
